@@ -85,4 +85,4 @@ xneurchecker/xneurchecker.anjuta
 *.pro.user*
 
 # cmake build directories
-*/build/*
+build/
