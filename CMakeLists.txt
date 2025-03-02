@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.2)
 project(
 	kbdex
 	DESCRIPTION "Программа для автоматического переключения раскладки клавиатуры на основе набираемого текста."
-	VERSION 0.1.0
+	VERSION 0.1.1
 	LANGUAGES CXX C)
 
 set(CMAKE_C_STANDARD 11)
