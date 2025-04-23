@@ -1,0 +1,162 @@
+---
+# Author: san, 0x10f05f (at) gmail.com
+
+# Clang-Format Sytle Options Reference:
+# https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+
+Language: Cpp
+
+BasedOnStyle: Microsoft
+
+AccessModifierOffset: -8
+
+AlignAfterOpenBracket: Align
+
+AlignConsecutiveDeclarations:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignFunctionDeclarations: false # Возможно, стоит удалить, так как в некоторых окружениях clang-format не поддерживает эту опцию
+  AlignFunctionPointers: true
+
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignCompound: false
+  PadOperators: false
+
+AlignOperands: Align
+
+AllowAllArgumentsOnNextLine: false
+
+AllowAllParametersOfDeclarationOnNextLine: false
+
+AllowShortBlocksOnASingleLine: Always
+
+AllowShortCaseLabelsOnASingleLine: false
+
+AllowShortFunctionsOnASingleLine: Inline
+
+# To avoid conflict, set this "Never" and each "if statement" should include brace when coding
+AllowShortIfStatementsOnASingleLine: Never
+
+AllowShortLambdasOnASingleLine: Inline
+
+AllowShortLoopsOnASingleLine: false
+
+BreakAfterReturnType: TopLevel
+
+BreakTemplateDeclarations: Yes
+
+BinPackArguments: false
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: false
+  AfterClass: true
+  AfterStruct: true
+  AfterControlStatement: Never
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterUnion: true
+  AfterExternBlock: false
+  BeforeCatch: false
+  BeforeElse: false
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+
+BreakBeforeBinaryOperators: None
+
+BreakBeforeTernaryOperators: true
+
+BreakConstructorInitializers: AfterColon
+
+BreakInheritanceList: AfterComma
+
+ColumnLimit: 100
+
+CompactNamespaces: false
+
+ContinuationIndentWidth: 4
+
+Cpp11BracedListStyle: false
+
+DerivePointerAlignment: false  # Make sure the * or & align on the left
+
+EmptyLineBeforeAccessModifier: Always
+
+FixNamespaceComments: true
+
+IncludeBlocks: Preserve
+
+IndentCaseLabels: false
+
+IndentPPDirectives: None
+
+IndentWidth: 8
+
+# KeepEmptyLinesAtTheStartOfBlocks: true
+
+KeepEmptyLines:
+  AtEndOfFile: true
+  AtStartOfBlock: false
+  AtStartOfFile: true
+
+MaxEmptyLinesToKeep: 2
+
+NamespaceIndentation: None
+
+PointerAlignment: Right
+
+ReflowComments: false
+
+SeparateDefinitionBlocks: Always   # Only support since clang-format 14
+
+SpaceAfterCStyleCast: false
+
+SpaceAfterLogicalNot: false
+
+SpaceAfterTemplateKeyword: false
+
+SpaceBeforeAssignmentOperators: true
+
+SpaceBeforeCpp11BracedList: false
+
+SpaceBeforeCtorInitializerColon: true
+
+SpaceBeforeInheritanceColon: true
+
+SpaceBeforeParens: ControlStatements
+
+SpaceBeforeRangeBasedForLoopColon: true
+
+SpaceBeforeSquareBrackets: false
+
+SpacesInParens: Custom
+SpacesInParensOptions:
+  ExceptDoubleParentheses: false
+  InConditionalStatements: false
+  InCStyleCasts: false
+  InEmptyParentheses: false
+  Other: false
+
+SpacesBeforeTrailingComments: 4
+
+SpacesInAngles: Never
+
+SpacesInContainerLiterals: true
+
+SpacesInSquareBrackets: false
+
+Standard: c++17
+
+TabWidth: 8
+
+UseTab: Never
+...
