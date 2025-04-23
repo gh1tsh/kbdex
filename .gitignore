@@ -25,9 +25,6 @@ Makefile.in
 # Translate binary files
 *.gmo
 
-# Hidden files
-.*
-
 # Meta Objet Compiler files
 moc_*.cpp
 
