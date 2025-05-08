@@ -33,13 +33,12 @@
 
 #include "RemoteUDevice.hpp"
 
-RemoteUDevice::RemoteUDevice(UNIXSocket<KBDAction> *conn) :
-    LuaIface(this, RemoteUDevice_lua_methods)
+RemoteUDevice::RemoteUDevice(UNIXSocket<KBDAction> *conn)
 {
         this->conn = conn;
 }
 
-RemoteUDevice::RemoteUDevice() : LuaIface(this, RemoteUDevice_lua_methods) {}
+RemoteUDevice::RemoteUDevice() {}
 
 RemoteUDevice::~RemoteUDevice() {}
 
@@ -86,5 +85,3 @@ RemoteUDevice::done()
         ac.done = 1;
         conn->send(&ac);
 }
-
-LUA_CREATE_BINDINGS(RemoteUDevice_lua_methods)

@@ -41,12 +41,9 @@
 extern "C" {
 #include <errno.h>
 #include <fcntl.h>
-#include <lauxlib.h>
 #include <linux/input.h>
 #include <linux/uinput.h>
 #include <linux/version.h>
-#include <lua.h>
-#include <lualib.h>
 #include <stdlib.h>
 #include <unistd.h>
 }
@@ -560,15 +557,7 @@ static const std::vector<int> ALL_KEYS = {
 #endif
 };
 
-// Methods to export to Lua
-// (ClassName, methodName, type0(), type1()...)
-#define UDevice_lua_methods(M, _) M(UDevice, emit, int(), int(), int()) _ M(UDevice, flush)
-
-// Declare extern "C" Lua bindings
-LUA_DECLARE(UDevice_lua_methods)
-
-class UDevice : public IUDevice,
-                public Lua::LuaIface<UDevice>
+class UDevice : public IUDevice
 {
 private:
         static const size_t             evbuf_start_len = 128;
@@ -577,8 +566,6 @@ private:
         int                             ev_delay = 3800;
         uinput_setup                    usetup;
         std::vector<struct input_event> events;
-
-        LUA_METHOD_COLLECT(UDevice_lua_methods);
 
 public:
         UDevice();
@@ -594,17 +581,16 @@ public:
         virtual void done() override;
 
         /** Set delay between outputted events in µs
-     *
-     * This is a workaround for a bug in GNOME Wayland where keys
-     * are being dropped if they are sent too fast.
-     *
-     * @param delay Delay in µs.
-     */
+         *
+         * This is a workaround for a bug in GNOME Wayland where keys
+         * are being dropped if they are sent too fast.
+         *
+         * @param delay Delay in µs.
+         */
         void setEventDelay(int delay);
 
-        /** Generate key up events for all held keys.
-     */
+        /**
+         * Generate key up events for all held keys.
+         */
         void upAll();
-
-        LUA_EXTRACT(UDevice_lua_methods)
 };

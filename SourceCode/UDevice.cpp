@@ -51,7 +51,7 @@ extern "C" {
 #include <filesystem>
 #include <regex>
 
-const char hawck_udev_name[] = "Hawck Virtual Keyboard";
+const char hawck_udev_name[] = "kbdex Virtual Keyboard";
 static_assert(sizeof(hawck_udev_name) < UINPUT_MAX_NAME_SIZE,
               "Length of uinput device name is too long.");
 
@@ -79,7 +79,7 @@ getDevice(const string &by_name)
         return -1;
 }
 
-UDevice::UDevice() : LuaIface(this, UDevice_lua_methods)
+UDevice::UDevice()
 {
         // UDevice initialization taken from this guide:
         //   https://www.kernel.org/doc/html/v4.12/input/uinput.html
@@ -206,5 +206,3 @@ UDevice::upAll()
                 }
         flush();
 }
-
-LUA_CREATE_BINDINGS(UDevice_lua_methods)

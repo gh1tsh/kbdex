@@ -41,35 +41,23 @@
 extern "C" {
 #include <errno.h>
 #include <fcntl.h>
-#include <lauxlib.h>
 #include <linux/input.h>
 #include <linux/uinput.h>
-#include <lua.h>
-#include <lualib.h>
 #include <stdlib.h>
 #include <unistd.h>
 }
 #include "IUDevice.hpp"
 #include "KBDAction.hpp"
-#include "LuaUtils.hpp"
 #include "UNIXSocket.hpp"
 #include <stdexcept>
 #include <stdio.h>
 #include <string.h>
 
-// Methods to export to Lua
-// (ClassName, methodName, type0(), type1()...)
-#define RemoteUDevice_lua_methods(M, _)                                                            \
-        M(RemoteUDevice, emit, int(), int(), int()) _ M(RemoteUDevice, flush)
-
-LUA_DECLARE(RemoteUDevice_lua_methods)
-
 /** Remote UDevice
  *
  * See UDevice
  */
-class RemoteUDevice : public IUDevice,
-                      public Lua::LuaIface<RemoteUDevice>
+class RemoteUDevice : public IUDevice
 {
 private:
         UNIXSocket<KBDAction> *conn = nullptr;
@@ -91,6 +79,4 @@ public:
         virtual void flush() override;
 
         inline void setConnection(UNIXSocket<KBDAction> *conn) { this->conn = conn; }
-
-        LUA_CLASS_INIT(RemoteUDevice_lua_methods)
 };
