@@ -45,7 +45,6 @@ extern "C" {
 #include "CSV.hpp"
 #include "Daemon.hpp"
 #include "KBDDaemon.hpp"
-#include "LuaUtils.hpp"
 #include "Permissions.hpp"
 #include "utils.hpp"
 
@@ -56,9 +55,8 @@ extern "C" {
 
 using namespace std;
 using namespace Permissions;
-using namespace Lua;
 
-KBDDaemon::KBDDaemon() : kbd_com("/var/lib/hawck-input/kbd.sock")
+KBDDaemon::KBDDaemon() : kbd_com("/var/lib/kbdexKeyboardAgent/kbd.sock")
 {
         initPassthrough();
 }
@@ -221,7 +219,7 @@ KBDDaemon::run()
                                 udev.flush();
                                 continue;
                         } catch (const SocketError &e) {
-                                syslog(LOG_INFO, "Resetting connection to MacroD");
+                                syslog(LOG_INFO, "Resetting connection to kbdexCore");
 
                                 udev.emit(&orig_ev);
                                 udev.upAll();
@@ -229,7 +227,7 @@ KBDDaemon::run()
 
                                 auto unlock = kbman.unlockAll();
                                 syslog(LOG_CRIT,
-                                       "Unable to communicate with MacroD, reconnecting ...");
+                                       "Unable to communicate with kbdexCore, reconnecting ...");
                                 // Reconnect.
                                 kbd_com.recon();
 

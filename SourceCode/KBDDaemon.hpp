@@ -46,7 +46,6 @@
 #include "KBDManager.hpp"
 #include "KeyCombo.hpp"
 #include "Keyboard.hpp"
-#include "LuaUtils.hpp"
 #include "SystemError.hpp"
 #include "UDevice.hpp"
 
@@ -77,19 +76,21 @@ class KBDDaemon
 private:
         Milliseconds                                        timeout = Milliseconds(2048);
         std::atomic<KeyVisibility>                          key_visibility[KEY_MAX];
-        std::string                                         home_path = "/var/lib/hawck-input";
+        std::string                                         home_path = "/var/lib/kbdexKeyboardAgent";
         std::unordered_map<std::string, std::string>        data_dirs = { { "keys",
                                                                             home_path + "/keys" } };
         std::unordered_map<std::string, std::vector<int> *> key_sources;
-        std::unordered_map<std::string, Lua::Script *>      scripts;
-        const std::string     scripts_dir = "/var/lib/hawck-input/scripts";
+        // std::unordered_map<std::string, Lua::Script *>      scripts;
+        // const std::string     scripts_dir = "/var/lib/kbdexKeyboardAgent/scripts";
         UNIXSocket<KBDAction> kbd_com;
         UDevice               udev;
         /** Watcher for /var/lib/hawck/keys */
         FSWatcher             keys_fsw;
-        /** Controls whether or not /unseen/ keyboards may be added when they are
-     * plugged in. Keyboards that were added on startup with --kbd-device
-     * arguments will always be reconnected on hotplug. */
+        /**
+         * Controls whether or not /unseen/ keyboards may be added when they are
+         * plugged in. Keyboards that were added on startup with --kbd-device
+         * arguments will always be reconnected on hotplug.
+         */
         bool                  allow_hotplug = true;
         KeyComboToggle        ks_combo      = KeyComboToggle({ KEY_ESC, KEY_SPACE });
 
@@ -105,9 +106,9 @@ public:
         ~KBDDaemon();
 
         /**
-     * Load a Lua script to process inputs. These Lua scripts are far more
-     * limited than their @{link MacroDaemon#loadScript()} counterparts.
-     */
+         * Load a Lua script to process inputs. These Lua scripts are far more
+         * limited than their @{link MacroDaemon#loadScript()} counterparts.
+         */
         void loadScript(const std::string &rel_path);
 
         void initPassthrough();
@@ -115,28 +116,28 @@ public:
         void handleKillswitch(const KBDAction &action) noexcept;
 
         /**
-     * Load passthrough keys from a file at `path`.
-     *
-     * @param path Path to csv file containing a `key_codes` column.
-     */
+         * Load passthrough keys from a file at `path`.
+         *
+         * @param path Path to csv file containing a `key_codes` column.
+         */
         void loadPassthrough(std::string path);
 
         /**
-     * Load passthrough keys from a file system event.
-     *
-     * @param ev File system event to load from.
-     */
+         * Load passthrough keys from a file system event.
+         *
+         * @param ev File system event to load from.
+         */
         void loadPassthrough(FSEvent *ev);
 
         /** Unload passthrough keys from file at `path`.
-     *
-     * @param path Path to csv file to remove key codes from.
-     */
+         *
+         * @param path Path to csv file to remove key codes from.
+         */
         void unloadPassthrough(std::string path);
 
         /**
-     * Start running the daemon.
-     */
+         * Start running the daemon.
+         */
         void run();
 
         /** Set timeout for read() on sockets. */

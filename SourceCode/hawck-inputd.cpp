@@ -39,10 +39,10 @@
 #include "KBDDaemon.hpp"
 #include "utils.hpp"
 
-#if MESON_COMPILE
 #include <hawck_config.h>
-#else
-#define INPUTD_VERSION "unknown"
+
+#ifndef KBDEX_VERSION
+#define KBDEX_VERSION "unknown"
 #endif
 
 extern "C" {
@@ -102,16 +102,16 @@ main(int argc, char *argv[])
         signal(SIGPIPE, handleSigPipe);
 
         string HELP =
-            "Usage: hawck-inputd [--udev-event-delay <us>] [--no-fork] [--socket-timeout]\n"
+            "Usage: kbdexKeyboardAgent [--udev-event-delay <us>] [--no-fork] [--socket-timeout]\n"
             "                    [--kbd-device <device>] [--no-hotplug]\n"
             "\n"
             "Examples:\n"
             "  Listen on a single device:\n"
-            "    hawck-inputd --kbd-device /dev/input/event13 --no-hotplug\n\n"
+            "    kbdexKeyboardAgent --kbd-device /dev/input/event13 --no-hotplug\n\n"
             "  Listen on multiple devices:\n"
-            "    hawck-inputd -k{/dev/input/event13,/dev/input/event15}\n\n"
+            "    kbdexKeyboardAgent -k{/dev/input/event13,/dev/input/event15}\n\n"
             "  Listen on all keyboard devices automatically:\n"
-            "    hawck-inputd\n\n"
+            "    kbdexKeyboardAgent\n\n"
             "Options:\n"
             "  --no-fork           Don't daemonize/fork.\n"
             "  -h, --help          Display this help information.\n"
@@ -123,30 +123,31 @@ main(int argc, char *argv[])
             "--kbd-device\n";
 
         int                  no_hotplug     = false;
-        static struct option long_options[] = { /* These options set a flag. */
-                                                { "no-fork", no_argument, &no_fork, 1 },
-                                                { "no-hotplug", no_argument, &no_hotplug, 1 },
-                                                { "udev-event-delay", required_argument, 0, 0 },
-                                                { "socket-timeout", required_argument, 0, 0 },
-                                                { "version", no_argument, 0, 0 },
-                                                /* These options don’t set a flag.
-               We distinguish them by their indices. */
-                                                { "help", no_argument, 0, 'h' },
-                                                { "kbd-device", required_argument, 0, 'k' },
-                                                { "kbd-name", required_argument, 0, 'n' },
-                                                { 0, 0, 0, 0 }
+        static struct option long_options[] = {
+                /* These options set a flag. */
+                { "no-fork", no_argument, &no_fork, 1 },
+                { "no-hotplug", no_argument, &no_hotplug, 1 },
+                { "udev-event-delay", required_argument, 0, 0 },
+                { "socket-timeout", required_argument, 0, 0 },
+                { "version", no_argument, 0, 0 },
+                /* These options don’t set a flag.
+                   We distinguish them by their indices. */
+                { "help", no_argument, 0, 'h' },
+                { "kbd-device", required_argument, 0, 'k' },
+                { "kbd-name", required_argument, 0, 'n' },
+                { 0, 0, 0, 0 }
         };
-        /* getopt_long stores the option index here. */
-        int option_index = 0;
 
-        int                                                      udev_event_delay = 3800;
-        int                                                      socket_timeout   = 1024;
-        vector<string>                                           kbd_names;
-        vector<string>                                           kbd_devices;
+        int option_index     = 0; /* getopt_long stores the option index here. */
+        int udev_event_delay = 3800;
+        int socket_timeout   = 1024;
+        vector<string> kbd_names;
+        vector<string> kbd_devices;
+
         unordered_map<string, function<void(const string &opt)>> long_handlers = {
                 { "version",
                   [&](const string &) {
-                          cout << "hawck-inputd v" INPUTD_VERSION << endl;
+                          cout << "kbdexKeyboardAgent v" INPUTD_VERSION << endl;
                           exit(0);
                   } },
                 NUM_OPTION(udev_event_delay) NUM_OPTION(socket_timeout)
@@ -224,16 +225,16 @@ main(int argc, char *argv[])
                 }
         }
 
-        cout << "Starting Hawck InputD v" INPUTD_VERSION " on:" << endl;
+        cout << "Starting kbdexKeyboardAgent on:" << endl;
         for (const auto &dev : kbd_devices)
                 cout << "  - <" << dev << ">" << endl;
 
         if (!no_fork) {
                 cout << "forking ..." << endl;
-                daemonize("/tmp/hawck-inputd.log");
+                daemonize("/tmp/kbdexKeyboardAgent.log");
         }
 
-        const string pid_file = "/var/lib/hawck-input/pid";
+        const string pid_file = "/var/lib/kbdexKeyboardAgent/pid";
         killPretender(pid_file);
 
         try {
@@ -243,10 +244,10 @@ main(int argc, char *argv[])
                         daemon.kbman.addDevice(dev);
                 daemon.setEventDelay(udev_event_delay);
                 daemon.setSocketTimeout(socket_timeout);
-                syslog(LOG_INFO, "Running Hawck InputD ...");
+                syslog(LOG_INFO, "Running kbdexKeyboardAgent ...");
                 daemon.run();
         } catch (const SystemError &e) {
-                syslog(LOG_CRIT, "Abort due to exception: %s", e.what());
+                syslog(LOG_CRIT, "kbdexKeyboardAgent aborted due to exception: %s", e.what());
                 cout << "Error: " << e.what() << endl;
                 e.printBacktrace();
                 clearPidFile(pid_file);
