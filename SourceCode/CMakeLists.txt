@@ -35,7 +35,7 @@ set(KBDEX_CORE_SRC
     Popen.cpp
 )
 
-add_executable(hawck-macrod ${KBDEX_CORE_SRC})
+add_executable(kbdexCore ${KBDEX_CORE_SRC})
 target_link_libraries(kbdexCore
     PkgConfig::LIBNOTIFY
     Threads::Threads
@@ -56,8 +56,8 @@ set(KBDEX_KEYBOARD_AGENT_SRC
     KBDManager.cpp
 )
 
-add_executable(kbdexCore ${KBDEX_KEYBOARD_AGENT_SRC})
-target_link_libraries(kbdexCore
+add_executable(kbdexKeyboardAgent ${KBDEX_KEYBOARD_AGENT_SRC})
+target_link_libraries(kbdexKeyboardAgent
     Threads::Threads
 )
 
