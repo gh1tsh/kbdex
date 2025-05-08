@@ -26,12 +26,10 @@ set(KBDEX_CORE_SRC
     RemoteUDevice.cpp
     Daemon.cpp
     MacroDaemon.cpp
-    LuaUtils.cpp
     Keyboard.cpp
     FSWatcher.cpp
     Permissions.cpp
     FIFOWatcher.cpp
-    LuaConfig.cpp
     XDG.cpp
     KBDB.cpp
     Popen.cpp
@@ -42,7 +40,6 @@ target_link_libraries(kbdexCore
     PkgConfig::LIBNOTIFY
     Threads::Threads
 )
-# target_include_directories(hawck-macrod PRIVATE ${LUA_INCLUDE_DIRS})
 
 # install(TARGETS hawck-macrod)
 
@@ -56,7 +53,6 @@ set(KBDEX_KEYBOARD_AGENT_SRC
     FSWatcher.cpp
     CSV.cpp
     Permissions.cpp
-    LuaUtils.cpp
     KBDManager.cpp
 )
 
@@ -64,6 +60,5 @@ add_executable(kbdexCore ${KBDEX_KEYBOARD_AGENT_SRC})
 target_link_libraries(kbdexCore
     Threads::Threads
 )
-# target_include_directories(kbdexCore PRIVATE ${LUA_INCLUDE_DIRS})
 
 # install(TARGETS kbdexCore)
