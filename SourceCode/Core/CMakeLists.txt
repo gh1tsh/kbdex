@@ -1,6 +1,6 @@
 project(
     kbdexCore
-    DESCRIPTION "KbdexCore"
+    DESCRIPTION "kbdexCore"
     LANGUAGES CXX
 )
 
