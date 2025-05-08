@@ -1,3 +1,8 @@
+/*
+ * Исходный код в этом файле частично или полностью заимствован мной из проекта
+ * hawck: https://github.com/snyball/hawck/tree/af318e24e63fb1ea87cb0080fe25ee293e5f2dd0
+ */
+
 /* =====================================================================================
  * Utilitiy functions, macros and templates for binding C++ code to Lua easily
  *
