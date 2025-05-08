@@ -38,26 +38,27 @@
 
 #pragma once
 
-#include <string>
-#include <stdexcept>
-#include <vector>
 #include <functional>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 extern "C" {
-    #include <unistd.h>
-    #include <fcntl.h>
-    #include <linux/uinput.h>
-    #include <linux/input.h>
-    #include <errno.h>
-    #include <stdlib.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <linux/input.h>
+#include <linux/uinput.h>
+#include <stdlib.h>
+#include <unistd.h>
 }
 
 #include "FSWatcher.hpp"
 #include "KBDAction.hpp"
 
-class KeyboardError : public std::runtime_error {
+class KeyboardError : public std::runtime_error
+{
 public:
-    explicit inline KeyboardError(std::string&& msg) : std::runtime_error(msg) {}
+        explicit inline KeyboardError(std::string &&msg) : std::runtime_error(msg) {}
 };
 
 /** Size of buffers given to ioctl. */
@@ -70,149 +71,142 @@ static constexpr size_t ioctl_get_bufsz = 512;
  * @param _what A macro taking a length argument, should be one of
  *              the EVIOCG* function-like macros from <linux/uinput.h>.
  */
-#define ioctlGetString(_fd, _what) \
-    _ioctlGetString((_fd), _what(ioctl_get_bufsz))
+#define ioctlGetString(_fd, _what) _ioctlGetString((_fd), _what(ioctl_get_bufsz))
 
 /**
  * @see ioctlGetString(_fd, _what)
  */
-static inline std::string _ioctlGetString(int fd, unsigned long what) {
-    char buf[ioctl_get_bufsz];
-    ssize_t sz;
-    if ((sz = ioctl(fd, what, buf)) == -1)
-        return "";
-    return std::string(buf);
+static inline std::string
+_ioctlGetString(int fd, unsigned long what)
+{
+        char    buf[ioctl_get_bufsz];
+        ssize_t sz;
+        if ((sz = ioctl(fd, what, buf)) == -1)
+                return "";
+        return std::string(buf);
 }
 
 /** Keyboard state, used in the locking process */
-enum KBDState {
-    LOCKED,
-    LOCKING,
-    OPEN,
+enum KBDState
+{
+        LOCKED,
+        LOCKING,
+        OPEN,
 };
 
 /**
  * Read directly from a keyboard input device.
  */
-class Keyboard {
+class Keyboard
+{
 private:
-    /** Whether or not we have an exclusive lock on the device. */
-    bool locked;
-    /** Human-readable name of the device. */
-    std::string name = "";
-    /** Name of the device in /dev/input/by-id/ */
-    std::string by_id = ""; // TODO: Initialize this
-    /** Name of the device in /dev/input/by-path/ */
-    std::string by_path = ""; // TODO: Initialize this
-    /** This path is volatile, if the device is unplugged it will
+        /** Whether or not we have an exclusive lock on the device. */
+        bool            locked;
+        /** Human-readable name of the device. */
+        std::string     name    = "";
+        /** Name of the device in /dev/input/by-id/ */
+        std::string     by_id   = "";    // TODO: Initialize this
+        /** Name of the device in /dev/input/by-path/ */
+        std::string     by_path = "";    // TODO: Initialize this
+        /** This path is volatile, if the device is unplugged it will
      *  cease to exist. */
-    std::string ev_path = "";
-    /** Physical location of device. */
-    std::string phys = "";
-    /** Numeric id of the device. */
-    struct input_id dev_id;
-    /** Unique id of the device. */
-    std::string uniq_id = "";
-    /** Filed descriptor for keyboard device. */
-    int fd = -1;
-    /** State of the keyboard, used in locking. */
-    KBDState state = KBDState::OPEN;
+        std::string     ev_path = "";
+        /** Physical location of device. */
+        std::string     phys    = "";
+        /** Numeric id of the device. */
+        struct input_id dev_id;
+        /** Unique id of the device. */
+        std::string     uniq_id = "";
+        /** Filed descriptor for keyboard device. */
+        int             fd      = -1;
+        /** State of the keyboard, used in locking. */
+        KBDState        state   = KBDState::OPEN;
 
 public:
-    /** Keyboard constructor.
+        /** Keyboard constructor.
      *
      * Tip: If you don't know which path you want, try running the `lskbd.rb` script.
      *
      * @param path Path to the character device file of the device,
      *             this should be in /dev/input/.
      */
-    explicit Keyboard(const char *path);
+        explicit Keyboard(const char *path);
 
-    /** Keyboard destructor.
+        /** Keyboard destructor.
      * 
      * Will also unlock the keyboard if it is locked.
      */
-    ~Keyboard();
+        ~Keyboard();
 
-    /** Acquire an exclusive lock to the keyboard. */
-    void lock();
+        /** Acquire an exclusive lock to the keyboard. */
+        void lock();
 
-    /** Acquire a lock immediately, this function will block until
+        /** Acquire a lock immediately, this function will block until
      *  a lock has been acquired. */
-    void lockSync();
+        void lockSync();
 
-    /** Release the exclusive lock to the keyboard. */
-    void unlock();
+        /** Release the exclusive lock to the keyboard. */
+        void unlock();
 
-    /** Disable the keyboard. */
-    void disable() noexcept;
+        /** Disable the keyboard. */
+        void disable() noexcept;
 
-    /** Format the Keyboard ID */
-    std::string getID() noexcept;
+        /** Format the Keyboard ID */
+        std::string getID() noexcept;
 
-    /** Check whether or not the keyboard has been disabled,
+        /** Check whether or not the keyboard has been disabled,
      * this happens if disable() is called, usually as a result
      * of the get() function throwing a KeyboardException.
      *
      * @return Disabled status.
      */
-    inline bool isDisabled() const noexcept {
-        return fd < 0;
-    }
+        inline bool isDisabled() const noexcept { return fd < 0; }
 
-    /** Reset the device, this is done after the device has
+        /** Reset the device, this is done after the device has
      *  been removed and then added again (physically.)
      *
      * You should only reset on a new device after confirming
      * it's identity with Keyboard::isMe
      */
-    void reset(const char *path);
+        void reset(const char *path);
 
-    /** Check if the given device is the same device as the
+        /** Check if the given device is the same device as the
      *  instance was initialized to originally. */
-    bool isMe(const char *path) const;
+        bool isMe(const char *path) const;
 
-    /** Get an event from the keyboard.
+        /** Get an event from the keyboard.
      *
      * This call will block until a key is pressed.
      */
-    void get(KBDAction *action);
+        void get(KBDAction *action);
 
-    /** Get human-readable name of the keyboard device.
+        /** Get human-readable name of the keyboard device.
      *
      * @return Human-readable name of device.
      */
-    inline const std::string& getName() const noexcept {
-        return name;
-    }
+        inline const std::string &getName() const noexcept { return name; }
 
-    /** Get file descriptor of the keyboard device.
+        /** Get file descriptor of the keyboard device.
      * 
      * @return System file descriptor.
      */
-    inline int getfd() const noexcept {
-        return fd;
-    }
+        inline int getfd() const noexcept { return fd; }
 
-    /**
+        /**
      * Get the current state of the keyboard locking process.
      *
      * @return Current state, @see KBDState
      */
-    inline KBDState getState() const noexcept {
-        return state;
-    }
+        inline KBDState getState() const noexcept { return state; }
 
-    /**
+        /**
      * Get the number of keys current held down on the keyboard.
      *
      * @return Number of keys held down.
      */
-    int numDown() const;
+        int numDown() const;
 
-    inline const std::string& getPhys() const noexcept {
-        return phys;
-    }
+        inline const std::string &getPhys() const noexcept { return phys; }
 };
 
 /**
@@ -226,13 +220,16 @@ public:
  * @return Index of keyboard with available input in kbds, returns
  *         -1 if the function timed out.
  */
-int kbdMultiplex(const std::vector<Keyboard*>& kbds, int timeout);
+int
+kbdMultiplex(const std::vector<Keyboard *> &kbds, int timeout);
 
 /**
  * Same as kbdMultiplex, but will not time out.
  *
  * @see kbdMultiplex
  */
-inline int kbdMultiplex(const std::vector<Keyboard*>& kbds) {
-    return kbdMultiplex(kbds, -1);
+inline int
+kbdMultiplex(const std::vector<Keyboard *> &kbds)
+{
+        return kbdMultiplex(kbds, -1);
 }

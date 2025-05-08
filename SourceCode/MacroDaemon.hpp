@@ -38,20 +38,20 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
 #include <chrono>
+#include <string>
+#include <vector>
 
-#include "UNIXSocket.hpp"
+#include "FIFOWatcher.hpp"
+#include "FSWatcher.hpp"
 #include "KBDAction.hpp"
 #include "LuaUtils.hpp"
 #include "RemoteUDevice.hpp"
-#include "FSWatcher.hpp"
-#include "FIFOWatcher.hpp"
+#include "UNIXSocket.hpp"
 #include "XDG.hpp"
 
 extern "C" {
-    #include <libnotify/notification.h>
+#include <libnotify/notification.h>
 }
 
 /** Macro daemon.
@@ -59,69 +59,66 @@ extern "C" {
  * Receive keyboard events from the KBDDaemon and run Lua
  * macros on them.
  */
-class MacroDaemon {
+class MacroDaemon
+{
 private:
-    UNIXServer kbd_srv;
-    UNIXSocket<KBDAction> *kbd_com = nullptr;
-    std::mutex scripts_mtx;
-    std::unordered_map<std::string, Lua::Script *> scripts;
-    RemoteUDevice remote_udev;
-    FSWatcher fsw;
-    XDG xdg;
+        UNIXServer                                     kbd_srv;
+        UNIXSocket<KBDAction>                         *kbd_com = nullptr;
+        std::mutex                                     scripts_mtx;
+        std::unordered_map<std::string, Lua::Script *> scripts;
+        RemoteUDevice                                  remote_udev;
+        FSWatcher                                      fsw;
+        XDG                                            xdg;
 
-    std::atomic<bool> notify_on_err;
-    std::atomic<bool> stop_on_err;
-    std::atomic<bool> eval_keydown;
-    std::atomic<bool> eval_keyup;
-    std::atomic<bool> eval_repeat;
-    std::atomic<bool> disabled;
+        std::atomic<bool> notify_on_err;
+        std::atomic<bool> stop_on_err;
+        std::atomic<bool> eval_keydown;
+        std::atomic<bool> eval_keyup;
+        std::atomic<bool> eval_repeat;
+        std::atomic<bool> disabled;
 
-    std::mutex last_notification_mtx;
-    std::tuple<std::string, std::string> last_notification;
+        std::mutex                           last_notification_mtx;
+        std::tuple<std::string, std::string> last_notification;
 
-    /** Display freedesktop DBus notification. */
-    void notify(std::string title,
-                std::string msg);
+        /** Display freedesktop DBus notification. */
+        void notify(std::string title, std::string msg);
 
-    /** Display freedesktop DBus notification. */
-    void notify(std::string title,
-                std::string msg,
-                std::string icon,
-                NotifyUrgency urgency);
+        /** Display freedesktop DBus notification. */
+        void notify(std::string title, std::string msg, std::string icon, NotifyUrgency urgency);
 
-    /** Run a script match on an input event.
+        /** Run a script match on an input event.
      *
      * @param sc Script to be executed.
      * @param ev Event to pass on to the script.
      * @param kbd_hid Human readable keyboard ID.
      * @return True if the key event should be repeated.
      */
-    bool runScript(Lua::Script *sc, const struct input_event &ev, std::string kbd_hid);
+        bool runScript(Lua::Script *sc, const struct input_event &ev, std::string kbd_hid);
 
-    /** Load a Lua script. */
-    void loadScript(const std::string &path);
+        /** Load a Lua script. */
+        void loadScript(const std::string &path);
 
-    void loadHawckScript(const std::string &path);
+        void loadHawckScript(const std::string &path);
 
-    /** Unload a Lua script */
-    void unloadScript(const std::string &path) noexcept;
+        /** Unload a Lua script */
+        void unloadScript(const std::string &path) noexcept;
 
-    /** Initialize a script directory. */
-    void initScriptDir(const std::string &dir_path);
+        /** Initialize a script directory. */
+        void initScriptDir(const std::string &dir_path);
 
-    /** Get a connection to listen for keys on. */
-    void getConnection();
+        /** Get a connection to listen for keys on. */
+        void getConnection();
 
-    /** Reload all scripts from their sources, this may be necessary
+        /** Reload all scripts from their sources, this may be necessary
      *  if an important configuration variable like the keymap is set. */
-    void reloadAll();
+        void reloadAll();
 
-    void startScriptWatcher();
+        void startScriptWatcher();
 
 public:
-    MacroDaemon();
-    ~MacroDaemon();
+        MacroDaemon();
+        ~MacroDaemon();
 
-    /** Run the mainloop. */
-    void run();
+        /** Run the mainloop. */
+        void run();
 };

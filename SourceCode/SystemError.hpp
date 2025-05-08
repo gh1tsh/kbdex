@@ -33,52 +33,58 @@
 
 #pragma once
 
-#include <string>
 #include <exception>
 #include <mutex>
+#include <string>
 
 extern "C" {
-    #undef _GNU_SOURCE
-    #include <string.h>
-    #define _GNU_SOURCE
-    #include <execinfo.h>
-    #include <stdio.h>
-    #include <syslog.h>
+#undef _GNU_SOURCE
+#include <string.h>
+#define _GNU_SOURCE
+#include <execinfo.h>
+#include <stdio.h>
+#include <syslog.h>
 }
 
 #include <iostream>
 
-static std::mutex strerror_mtx;
+static std::mutex       strerror_mtx;
 static constexpr size_t STACK_MAX_ELEMS = 100;
 
-class SystemError : public std::exception {
+class SystemError : public std::exception
+{
 private:
-    std::string expl;
-    void *stack[STACK_MAX_ELEMS];
-    size_t stack_sz;
+        std::string expl;
+        void       *stack[STACK_MAX_ELEMS];
+        size_t      stack_sz;
 
-    inline void _printBacktrace() {
-        constexpr int elems = 100;
-        void *stack[elems];
-        size_t size = backtrace(stack, elems);
-        backtrace_symbols_fd(stack + 1, size - 1, fileno(stderr));
-    }
+        inline void _printBacktrace()
+        {
+                constexpr int elems = 100;
+                void         *stack[elems];
+                size_t        size = backtrace(stack, elems);
+                backtrace_symbols_fd(stack + 1, size - 1, fileno(stderr));
+        }
 
 public:
-    inline void printBacktrace() const {
-        backtrace_symbols_fd(stack + 1, stack_sz - 1, fileno(stderr));
-    }
+        inline void printBacktrace() const
+        {
+                backtrace_symbols_fd(stack + 1, stack_sz - 1, fileno(stderr));
+        }
 
-    explicit SystemError(const std::string &expl) : expl(expl) {
-        stack_sz = backtrace(stack, STACK_MAX_ELEMS);
-    }
+        explicit SystemError(const std::string &expl) : expl(expl)
+        {
+                stack_sz = backtrace(stack, STACK_MAX_ELEMS);
+        }
 
-    inline SystemError(const std::string &expl, int errnum) : expl(expl) {
-        this->expl += getErrorString(errnum);
-        syslog(LOG_ERR, "SystemError: %s", this->expl.c_str());
-    }
+        inline SystemError(const std::string &expl, int errnum) : expl(expl)
+        {
+                this->expl += getErrorString(errnum);
+                syslog(LOG_ERR, "SystemError: %s", this->expl.c_str());
+        }
 
-    static inline std::string getErrorString(int errnum) {
+        static inline std::string getErrorString(int errnum)
+        {
 #if 0
         // FIXME: This always results in strerror_r:UNKNOWN, while
         //        the strerror function works just fine.
@@ -93,19 +99,15 @@ public:
         }
         std::string err_msg(errbuf);
 #else
-        // Workaround using static mutex
-        std::lock_guard<std::mutex> lock(strerror_mtx);
-        std::string err_msg(strerror(errnum));
+                // Workaround using static mutex
+                std::lock_guard<std::mutex> lock(strerror_mtx);
+                std::string                 err_msg(strerror(errnum));
 #endif
 
-        return err_msg;
-    }
+                return err_msg;
+        }
 
-    static inline std::string getErrorString() {
-        return getErrorString(errno);
-    }
+        static inline std::string getErrorString() { return getErrorString(errno); }
 
-    virtual const char *what() const noexcept {
-        return expl.c_str();
-    }
+        virtual const char *what() const noexcept { return expl.c_str(); }
 };

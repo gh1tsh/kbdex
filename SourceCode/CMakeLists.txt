@@ -61,4 +61,4 @@ target_link_libraries(kbdexKeyboardAgent
     Threads::Threads
 )
 
-# install(TARGETS kbdexCore)
+# install(TARGETS kbdexKeyboardAgent)

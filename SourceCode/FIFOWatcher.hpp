@@ -34,33 +34,35 @@
 #pragma once
 
 #include <chrono>
-#include <string>
-#include <memory>
 #include <functional>
+#include <memory>
+#include <string>
 
-class FIFOWatcher {
-    using Milliseconds = std::chrono::milliseconds;
+class FIFOWatcher
+{
+        using Milliseconds = std::chrono::milliseconds;
+
 private:
-    int fd = -1;
-    int ofd = -1;
-    std::string path;
-    std::string opath;
-    uint32_t max_recv = 16384;
+        int         fd  = -1;
+        int         ofd = -1;
+        std::string path;
+        std::string opath;
+        uint32_t    max_recv = 16384;
 
-    virtual void watch();
+        virtual void watch();
 
-    virtual void reset();
+        virtual void reset();
 
 public:
-    explicit FIFOWatcher(const std::string& fifo_path, const std::string& fifo_in_path);
+        explicit FIFOWatcher(const std::string &fifo_path, const std::string &fifo_in_path);
 
-    virtual ~FIFOWatcher();
+        virtual ~FIFOWatcher();
 
-    virtual std::string handleMessage(const char *buf, size_t);
+        virtual std::string handleMessage(const char *buf, size_t);
 
-    virtual void reply(std::string buf, Milliseconds timeout);
+        virtual void reply(std::string buf, Milliseconds timeout);
 
-    /** Start a new thread to watch the fifo, call the callback when
+        /** Start a new thread to watch the fifo, call the callback when
      *  a packet is received. */
-    virtual void start();
+        virtual void start();
 };

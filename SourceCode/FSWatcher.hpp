@@ -42,30 +42,30 @@
  */
 
 extern "C" {
-    #include <limits.h>
-    #include <sys/stat.h>
-    #include <unistd.h>
+#include <limits.h>
+#include <sys/stat.h>
+#include <unistd.h>
 }
 
 #if __linux
-    extern "C" {
-        #include <sys/inotify.h>
-    }
-    using OSEvent = struct inotify_event;
-    using OSAPIHandle = int;
-    using OSFileStat = struct stat;
+extern "C" {
+#include <sys/inotify.h>
+}
+using OSEvent     = struct inotify_event;
+using OSAPIHandle = int;
+using OSFileStat  = struct stat;
 #else
-    #error "This class currently only supports the Linux inotify API."
+#error "This class currently only supports the Linux inotify API."
 #endif
 
-#include <vector>
-#include <string>
-#include <unordered_map>
-#include <thread>
-#include <mutex>
 #include <atomic>
 #include <functional>
+#include <mutex>
 #include <stdexcept>
+#include <string>
+#include <thread>
+#include <unordered_map>
+#include <vector>
 
 /** Number of items inside the event buffer of \link FSWatcher \endlink */
 static constexpr size_t EVBUF_ITEMS = 10;
@@ -75,34 +75,36 @@ static constexpr size_t EVBUF_ITEMS = 10;
 static constexpr int FSW_THREAD_STOP_TIMEOUT_SEC = 15;
 
 /** File system event */
-struct FSEvent {
-    /** Absolute path to file. */
-    std::string path;
-    /** Mask received from inotify. */
-    uint32_t mask = 0;
-    /** Name of file (relevent for directory events.) */
-    std::string name;
-    /** stat() of the file. */
-    struct stat stbuf;
-    /** True if this event was sent as a result of FSWatcher::add() */
-    bool added = false;
-    /** True if this event was sent as a result of file deletion. */
-    bool deleted = false;
+struct FSEvent
+{
+        /** Absolute path to file. */
+        std::string path;
+        /** Mask received from inotify. */
+        uint32_t    mask = 0;
+        /** Name of file (relevent for directory events.) */
+        std::string name;
+        /** stat() of the file. */
+        struct stat stbuf;
+        /** True if this event was sent as a result of FSWatcher::add() */
+        bool        added   = false;
+        /** True if this event was sent as a result of file deletion. */
+        bool        deleted = false;
 
-    /** Initialize an FSEvent from an inotify event */
-    FSEvent(struct inotify_event *ev, std::string path);
+        /** Initialize an FSEvent from an inotify event */
+        FSEvent(struct inotify_event *ev, std::string path);
 
-    /** Initialize an FSEvent from an absolute path, assumed to
+        /** Initialize an FSEvent from an absolute path, assumed to
      *  be an `added` event. */
-    explicit FSEvent(std::string path);
+        explicit FSEvent(std::string path);
 };
 
 using FSWatchFn = std::function<bool(FSEvent &ev)>;
 
-enum RunState {
-    STOPPED,
-    RUNNING,
-    STOPPING,
+enum RunState
+{
+        STOPPED,
+        RUNNING,
+        STOPPING,
 };
 
 /** File system watcher.
@@ -145,50 +147,51 @@ enum RunState {
  *   // This leads to an abort() as FSWatcher::stop() is unable
  *   // to stop the last handler in time.
  */
-class FSWatcher {
+class FSWatcher
+{
 private:
-    /** Inotify main file descriptor. */
-    OSAPIHandle fd;
-    /** Event buffer used to receive inotify events. */
-    char evbuf[EVBUF_ITEMS * (sizeof(struct inotify_event) + NAME_MAX + 1)];
-    /** Maps paths to watch descriptors. */
-    std::unordered_map<std::string, int> path_to_wd;
-    /** Maps ids received from inotify to paths, ids are referred to
+        /** Inotify main file descriptor. */
+        OSAPIHandle fd;
+        /** Event buffer used to receive inotify events. */
+        char        evbuf[EVBUF_ITEMS * (sizeof(struct inotify_event) + NAME_MAX + 1)];
+        /** Maps paths to watch descriptors. */
+        std::unordered_map<std::string, int> path_to_wd;
+        /** Maps ids received from inotify to paths, ids are referred to
      *  as wd (watch-descriptor.) */
-    std::unordered_map<int, std::string> wd_to_path;
-    /** Protects \link FSWatcher::events \endlink */
-    std::mutex events_mtx;
-    /** Holds received events, is emptied by calling
+        std::unordered_map<int, std::string> wd_to_path;
+        /** Protects \link FSWatcher::events \endlink */
+        std::mutex                           events_mtx;
+        /** Holds received events, is emptied by calling
      *  \link FSWatcher::getEvents() \endlink */
-    std::vector<FSEvent *> events;
-    /** Set to RUNNING when \link FSWatcher::watch() \endlink is called,
+        std::vector<FSEvent *>               events;
+        /** Set to RUNNING when \link FSWatcher::watch() \endlink is called,
      *  is set to STOPPED by calling \link FSWatcher::stop() \endlink */
-    std::atomic<RunState> running = RunState::STOPPED;
-    /** Whether or not to automatically add files that are created in
+        std::atomic<RunState>                running         = RunState::STOPPED;
+        /** Whether or not to automatically add files that are created in
      *  watched directories. */
-    bool auto_add = true;
-    /** Whether or not to receive events about directories. */
-    bool watch_dirs = false;
-    /** Used for backing up the number of unread evbuf elements
+        bool                                 auto_add        = true;
+        /** Whether or not to receive events about directories. */
+        bool                                 watch_dirs      = false;
+        /** Used for backing up the number of unread evbuf elements
      *  present when a callback function terminated, the watcher
      *  can then be restarted without missing any events.
      *  XXX: I'm guessing the kernel will eventually start to drop
      *       events if there are too many unread ones. So if you don't
      *       want to miss out then you should probably not leave the
      *       FSW instance hanging around for too long. */
-    size_t backup_num_read = 0;
+        size_t                               backup_num_read = 0;
 
-    static std::atomic<int> num_instances;
+        static std::atomic<int> num_instances;
 
-    /** Handle an event. */
-    FSEvent *handleEvent(struct inotify_event *ev);
+        /** Handle an event. */
+        FSEvent *handleEvent(struct inotify_event *ev);
 
 public:
-    /** Initialize inotify file descriptor.
+        /** Initialize inotify file descriptor.
      */
-    FSWatcher();
+        FSWatcher();
 
-    /** FSWatcher destructor, stops the currently running thread.
+        /** FSWatcher destructor, stops the currently running thread.
      *
      * If we time out on stopping the thread a runtime_exception
      * will be thrown, this can happen if your callback ran into
@@ -198,35 +201,35 @@ public:
      * @see FSW_THREAD_STOP_TIMEOUT_SEC For the actual amount of seconds
      *                                  you should expect.
      */
-    ~FSWatcher() noexcept(false);
+        ~FSWatcher() noexcept(false);
 
-    /** Add a single file.
+        /** Add a single file.
      *
      * Attempting to add a file twice will result in the second call
      * failing silently.
      *
      * @param path Path to file.
      */
-    void add(std::string path);
+        void add(std::string path);
 
-    /** Remove a single file.
+        /** Remove a single file.
      *
      * Trying to remove a file that isn't being watched will fail silently.
      * 
      * @param path Path to file.
      */
-    void remove(std::string path);
+        void remove(std::string path);
 
-    /** Add an entire directory tree, this only adds the directories.
+        /** Add an entire directory tree, this only adds the directories.
      */
-    void addTree();
+        void addTree();
 
-    /** Adds all files in a directory tree, this does not add any
+        /** Adds all files in a directory tree, this does not add any
      *  directories.
      */
-    void addTreeFiles();
+        void addTreeFiles();
 
-    /** Add files from a directory.
+        /** Add files from a directory.
      * 
      * Add all files in a directory and the directory itself. (Does not add sub-directories.)
      * Files created in the directory after the call are automatically added.
@@ -234,15 +237,15 @@ public:
      * @param path Path to directory.
      * @return Vector of files that were added.
      */
-    std::vector<FSEvent> *addFrom(std::string path);
+        std::vector<FSEvent> *addFrom(std::string path);
 
-    /** Remove a directory and the files within.
+        /** Remove a directory and the files within.
      *
      * @param path Path to directory.
      */
-    void removeFrom(std::string path);
+        void removeFrom(std::string path);
 
-    /** Spawn a thread watching over the added files, this
+        /** Spawn a thread watching over the added files, this
      *  new thread calls watch() with the provided callback.
      *
      * The thread will be detached, stop the thread by calling
@@ -257,23 +260,24 @@ public:
      *
      * @param callback Passed to watch()
      */
-    inline void asyncWatch(const FSWatchFn &callback) {
-        if (running == RunState::RUNNING)
-            throw std::runtime_error("Have already begun watching.");
+        inline void asyncWatch(const FSWatchFn &callback)
+        {
+                if (running == RunState::RUNNING)
+                        throw std::runtime_error("Have already begun watching.");
 
-        running = RunState::RUNNING;
-        std::thread t0([callback, this]() {this->watch(callback);});
-        t0.detach();
-    }
+                running = RunState::RUNNING;
+                std::thread t0([callback, this]() { this->watch(callback); });
+                t0.detach();
+        }
 
-    /** Watch the added files using a given callback.
+        /** Watch the added files using a given callback.
      *
      * @param callback Callback for handling file system events, returning
      *                 false from the handler stops watch().
      */
-    void watch(const FSWatchFn &callback);
+        void watch(const FSWatchFn &callback);
 
-    /** Stop watching.
+        /** Stop watching.
      *
      * Note: This function will call runtime_error if it times out
      *       on stopping your handler function.
@@ -281,26 +285,20 @@ public:
      * @see FSW_THREAD_STOP_TIMEOUT_SEC For the actual amount of seconds
      *                                  you should expect.
      */
-    void stop();
+        void stop();
 
-    /** Check if the watcher is running.
+        /** Check if the watcher is running.
      */
-    inline bool isRunning() {
-        return running == RunState::RUNNING;
-    }
+        inline bool isRunning() { return running == RunState::RUNNING; }
 
-    /** Set whether or not to receive events about directories */
-    inline void setWatchDirs(bool w) {
-        this->watch_dirs = w;
-    }
+        /** Set whether or not to receive events about directories */
+        inline void setWatchDirs(bool w) { this->watch_dirs = w; }
 
-    /** Set whether or not to automatically add new files to the
+        /** Set whether or not to automatically add new files to the
      *  watch list */
-    inline void setAutoAdd(bool auto_add) {
-        this->auto_add = auto_add;
-    }
+        inline void setAutoAdd(bool auto_add) { this->auto_add = auto_add; }
 
-    int getMaxWatchers() const;
+        int getMaxWatchers() const;
 };
 
 

@@ -40,32 +40,33 @@
 #pragma once
 
 extern "C" {
-    #include <unistd.h>
-    #include <fcntl.h>
-    #include <linux/uinput.h>
-    #include <linux/input.h>
-    #include <errno.h>
-    #include <stdlib.h>
-    #include <lua.h>
-    #include <lauxlib.h>
-    #include <lualib.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <lauxlib.h>
+#include <linux/input.h>
+#include <linux/uinput.h>
+#include <lua.h>
+#include <lualib.h>
+#include <stdlib.h>
+#include <unistd.h>
 }
 #include "LuaUtils.hpp"
 
-class IUDevice {
+class IUDevice
+{
 public:
-    /** Destroy virtual device. */
-    virtual ~IUDevice() {}
+        /** Destroy virtual device. */
+        virtual ~IUDevice() {}
 
-    /**
+        /**
      * Send an input event struct, this is useful for when
      * you want to re-emit a cought event.
      *
      * @param send_event Event to emit.
      */
-    virtual void emit(const input_event *send_event) = 0;
+        virtual void emit(const input_event *send_event) = 0;
 
-    /**
+        /**
      * Emit an input event on the virtual device.
      *
      * @param type What kind of event it is, i.e EV_KEY or EV_SYN
@@ -74,12 +75,12 @@ public:
      *            keys, 0 means key up and 1 means key down, and
      *            2 means key repeat.
      */
-    virtual void emit(int type, int code, int val) = 0;
+        virtual void emit(int type, int code, int val) = 0;
 
-    virtual void done() = 0;
+        virtual void done() = 0;
 
-    /**
+        /**
      * Flush buffered events to the virtual device.
      */
-    virtual void flush() = 0;
+        virtual void flush() = 0;
 };

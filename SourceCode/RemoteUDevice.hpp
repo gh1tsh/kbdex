@@ -39,29 +39,28 @@
 #pragma once
 
 extern "C" {
-    #include <unistd.h>
-    #include <fcntl.h>
-    #include <linux/uinput.h>
-    #include <linux/input.h>
-    #include <errno.h>
-    #include <stdlib.h>
-    #include <lua.h>
-    #include <lauxlib.h>
-    #include <lualib.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <lauxlib.h>
+#include <linux/input.h>
+#include <linux/uinput.h>
+#include <lua.h>
+#include <lualib.h>
+#include <stdlib.h>
+#include <unistd.h>
 }
-#include <string.h>
-#include <stdio.h>
-#include <stdexcept>
-#include "LuaUtils.hpp"
-#include "UNIXSocket.hpp"
 #include "IUDevice.hpp"
 #include "KBDAction.hpp"
+#include "LuaUtils.hpp"
+#include "UNIXSocket.hpp"
+#include <stdexcept>
+#include <stdio.h>
+#include <string.h>
 
 // Methods to export to Lua
 // (ClassName, methodName, type0(), type1()...)
-#define RemoteUDevice_lua_methods(M, _)                 \
-    M(RemoteUDevice, emit, int(), int(), int()) _       \
-    M(RemoteUDevice, flush)
+#define RemoteUDevice_lua_methods(M, _)                                                            \
+        M(RemoteUDevice, emit, int(), int(), int()) _ M(RemoteUDevice, flush)
 
 LUA_DECLARE(RemoteUDevice_lua_methods)
 
@@ -70,29 +69,28 @@ LUA_DECLARE(RemoteUDevice_lua_methods)
  * See UDevice
  */
 class RemoteUDevice : public IUDevice,
-                      public Lua::LuaIface<RemoteUDevice> {
+                      public Lua::LuaIface<RemoteUDevice>
+{
 private:
-    UNIXSocket<KBDAction> *conn = nullptr;
-    std::vector<KBDAction> evbuf;
+        UNIXSocket<KBDAction> *conn = nullptr;
+        std::vector<KBDAction> evbuf;
 
 public:
-    explicit RemoteUDevice(UNIXSocket<KBDAction> *conn);
+        explicit RemoteUDevice(UNIXSocket<KBDAction> *conn);
 
-    RemoteUDevice();
+        RemoteUDevice();
 
-    virtual ~RemoteUDevice();
+        virtual ~RemoteUDevice();
 
-    virtual void emit(const input_event *send_event) override;
+        virtual void emit(const input_event *send_event) override;
 
-    virtual void emit(int type, int code, int val) override;
+        virtual void emit(int type, int code, int val) override;
 
-    virtual void done() override;
+        virtual void done() override;
 
-    virtual void flush() override;
+        virtual void flush() override;
 
-    inline void setConnection(UNIXSocket<KBDAction> *conn) {
-        this->conn = conn;
-    }
+        inline void setConnection(UNIXSocket<KBDAction> *conn) { this->conn = conn; }
 
-    LUA_CLASS_INIT(RemoteUDevice_lua_methods)
+        LUA_CLASS_INIT(RemoteUDevice_lua_methods)
 };

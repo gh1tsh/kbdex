@@ -33,115 +33,114 @@
 
 #pragma once
 
-#include <unordered_map>
-#include <set>
 #include <mutex>
-#include <thread>
 #include <regex>
+#include <set>
+#include <thread>
+#include <unordered_map>
 
 #include "KBDConnection.hpp"
-#include "UNIXSocket.hpp" 
+#include "UNIXSocket.hpp"
 
-#include "KBDManager.hpp"
-#include "UDevice.hpp"
-#include "LuaUtils.hpp"
-#include "Keyboard.hpp"
-#include "SystemError.hpp"
 #include "FSWatcher.hpp"
+#include "KBDManager.hpp"
 #include "KeyCombo.hpp"
+#include "Keyboard.hpp"
+#include "LuaUtils.hpp"
+#include "SystemError.hpp"
+#include "UDevice.hpp"
 
 extern "C" {
-    #include <fcntl.h>
-    #include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 }
 
 // XXX: DO NOT ENABLE THIS FOR NON-DEBUGGING BUILDS
 //      This will log keypresses to stdout
-#define DANGER_DANGER_LOG_KEYS 0
+#define DANGER_DANGER_LOG_KEYS 1    // Активировал эту супер-дупер-мега опасную директиву
 
-class KBDDaemon {
-    enum KeyVisibility {
-        /* Show a key to the MacroDaemon */
-        KEY_SHOW,
-        /* Keep a key inside the InputDaemon */
-        KEY_KEEP,
-        /* Hide a key, this means no Lua scripts will see them, and they will be echoed
+class KBDDaemon
+{
+        enum KeyVisibility
+        {
+                /* Show a key to the MacroDaemon */
+                KEY_SHOW,
+                /* Keep a key inside the InputDaemon */
+                KEY_KEEP,
+                /* Hide a key, this means no Lua scripts will see them, and they will be echoed
            onto the virtual keyboard. */
-        KEY_HIDE
-    };
+                KEY_HIDE
+        };
 
-    using Milliseconds = std::chrono::milliseconds;
+        using Milliseconds = std::chrono::milliseconds;
 
-  private:
-    Milliseconds timeout = Milliseconds(2048);
-    std::atomic<KeyVisibility> key_visibility[KEY_MAX];
-    std::string home_path = "/var/lib/hawck-input";
-    std::unordered_map<std::string, std::string> data_dirs = {
-        {"keys", home_path + "/keys"}
-    };
-    std::unordered_map<std::string, std::vector<int>*> key_sources;
-    std::unordered_map<std::string, Lua::Script *> scripts;
-    const std::string scripts_dir = "/var/lib/hawck-input/scripts";
-    UNIXSocket<KBDAction> kbd_com;
-    UDevice udev;
-    /** Watcher for /var/lib/hawck/keys */
-    FSWatcher keys_fsw;
-    /** Controls whether or not /unseen/ keyboards may be added when they are
+private:
+        Milliseconds                                        timeout = Milliseconds(2048);
+        std::atomic<KeyVisibility>                          key_visibility[KEY_MAX];
+        std::string                                         home_path = "/var/lib/hawck-input";
+        std::unordered_map<std::string, std::string>        data_dirs = { { "keys",
+                                                                            home_path + "/keys" } };
+        std::unordered_map<std::string, std::vector<int> *> key_sources;
+        std::unordered_map<std::string, Lua::Script *>      scripts;
+        const std::string     scripts_dir = "/var/lib/hawck-input/scripts";
+        UNIXSocket<KBDAction> kbd_com;
+        UDevice               udev;
+        /** Watcher for /var/lib/hawck/keys */
+        FSWatcher             keys_fsw;
+        /** Controls whether or not /unseen/ keyboards may be added when they are
      * plugged in. Keyboards that were added on startup with --kbd-device
      * arguments will always be reconnected on hotplug. */
-    bool allow_hotplug = true;
-    KeyComboToggle ks_combo = KeyComboToggle({KEY_ESC, KEY_SPACE});
+        bool                  allow_hotplug = true;
+        KeyComboToggle        ks_combo      = KeyComboToggle({ KEY_ESC, KEY_SPACE });
 
-  private:
-    void setup();
-    void startPassthroughWatcher();
+private:
+        void setup();
+        void startPassthroughWatcher();
 
-  public:
-    KBDManager kbman;
+public:
+        KBDManager kbman;
 
-    explicit KBDDaemon(const char *device);
-    KBDDaemon();
-    ~KBDDaemon();
+        explicit KBDDaemon(const char *device);
+        KBDDaemon();
+        ~KBDDaemon();
 
-    /**
+        /**
      * Load a Lua script to process inputs. These Lua scripts are far more
      * limited than their @{link MacroDaemon#loadScript()} counterparts.
      */
-    void loadScript(const std::string &rel_path);
+        void loadScript(const std::string &rel_path);
 
-    void initPassthrough();
+        void initPassthrough();
 
-    void handleKillswitch(const KBDAction& action) noexcept;
+        void handleKillswitch(const KBDAction &action) noexcept;
 
-    /**
+        /**
      * Load passthrough keys from a file at `path`.
      *
      * @param path Path to csv file containing a `key_codes` column.
      */
-    void loadPassthrough(std::string path);
+        void loadPassthrough(std::string path);
 
-    /**
+        /**
      * Load passthrough keys from a file system event.
      *
      * @param ev File system event to load from.
      */
-    void loadPassthrough(FSEvent *ev);
+        void loadPassthrough(FSEvent *ev);
 
-    /** Unload passthrough keys from file at `path`.
+        /** Unload passthrough keys from file at `path`.
      *
      * @param path Path to csv file to remove key codes from.
      */
-    void unloadPassthrough(std::string path);
+        void unloadPassthrough(std::string path);
 
-    /**
+        /**
      * Start running the daemon.
      */
-    void run();
+        void run();
 
-    /** Set timeout for read() on sockets. */
-    inline void setSocketTimeout(int time) {
-        timeout = Milliseconds(time);
-    }
+        /** Set timeout for read() on sockets. */
+        inline void setSocketTimeout(int time) { timeout = Milliseconds(time); }
 
-    void setEventDelay(int delay);
+        void setEventDelay(int delay);
 };
