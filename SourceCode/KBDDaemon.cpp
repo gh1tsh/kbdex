@@ -56,7 +56,7 @@ extern "C" {
 using namespace std;
 using namespace Permissions;
 
-KBDDaemon::KBDDaemon() : kbd_com("/var/lib/kbdexKeyboardAgent/kbd.sock")
+KBDDaemon::KBDDaemon() : kbd_com("/var/lib/kbdex/kbd.sock")
 {
         initPassthrough();
 }

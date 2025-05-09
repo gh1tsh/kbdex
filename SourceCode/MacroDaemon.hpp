@@ -45,7 +45,6 @@
 #include "FIFOWatcher.hpp"
 #include "FSWatcher.hpp"
 #include "KBDAction.hpp"
-#include "LuaUtils.hpp"
 #include "RemoteUDevice.hpp"
 #include "UNIXSocket.hpp"
 #include "XDG.hpp"
@@ -54,18 +53,17 @@ extern "C" {
 #include <libnotify/notification.h>
 }
 
-/** Macro daemon.
+/** kbdexCore
  *
- * Receive keyboard events from the KBDDaemon and run Lua
- * macros on them.
+ * Receive keyboard events from the kbdexKeyboardAgent and process them.
+ *
+ * TODO: улучшить документирующий комментарий.
  */
 class MacroDaemon
 {
 private:
         UNIXServer                                     kbd_srv;
         UNIXSocket<KBDAction>                         *kbd_com = nullptr;
-        std::mutex                                     scripts_mtx;
-        std::unordered_map<std::string, Lua::Script *> scripts;
         RemoteUDevice                                  remote_udev;
         FSWatcher                                      fsw;
         XDG                                            xdg;
@@ -87,12 +85,12 @@ private:
         void notify(std::string title, std::string msg, std::string icon, NotifyUrgency urgency);
 
         /** Run a script match on an input event.
-     *
-     * @param sc Script to be executed.
-     * @param ev Event to pass on to the script.
-     * @param kbd_hid Human readable keyboard ID.
-     * @return True if the key event should be repeated.
-     */
+         *
+         * @param sc Script to be executed.
+         * @param ev Event to pass on to the script.
+         * @param kbd_hid Human readable keyboard ID.
+         * @return True if the key event should be repeated.
+         */
         bool runScript(Lua::Script *sc, const struct input_event &ev, std::string kbd_hid);
 
         /** Load a Lua script. */

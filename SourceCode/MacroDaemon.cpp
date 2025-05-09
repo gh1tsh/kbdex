@@ -42,22 +42,19 @@ extern "C" {
 
 #include "Daemon.hpp"
 #include "KBDB.hpp"
-#include "LuaConfig.hpp"
-#include "LuaUtils.hpp"
 #include "MacroDaemon.hpp"
 #include "Permissions.hpp"
 #include "Popen.hpp"
 #include "XDG.hpp"
 #include "utils.hpp"
 
-using namespace Lua;
 using namespace Permissions;
 using namespace std;
 namespace fs = std::filesystem;
 
-static bool macrod_main_loop_running = true;
+static bool kbdexCore_main_loop_running = true;
 
-MacroDaemon::MacroDaemon() : kbd_srv("/var/lib/hawck-input/kbd.sock"), xdg("hawck")
+MacroDaemon::MacroDaemon() : kbd_srv("/var/lib/kbdex/kbd.sock"), xdg("kbdex")
 {
         notify_on_err = true;
         stop_on_err   = false;
@@ -66,15 +63,13 @@ MacroDaemon::MacroDaemon() : kbd_srv("/var/lib/hawck-input/kbd.sock"), xdg("hawc
         eval_repeat   = true;
         disabled      = false;
 
-        auto [grp, grpbuf] = getgroup("hawck-input-share");
+        auto [grp, grpbuf] = getgroup("kbdex-input-share");
         (void)grpbuf;
-        if (chown("/var/lib/hawck-input/kbd.sock", getuid(), grp->gr_gid) == -1)
+        if (chown("/var/lib/kbdex/kbd.sock", getuid(), grp->gr_gid) == -1)
                 throw SystemError("Unable to chown kbd.sock: ", errno);
-        if (chmod("/var/lib/hawck-input/kbd.sock", 0660) == -1)
+        if (chmod("/var/lib/kbdex/kbd.sock", 0660) == -1)
                 throw SystemError("Unable to chmod kbd.sock: ", errno);
-        notify_init("Hawck");
-        xdg.mkpath(0755, XDG_CONFIG_HOME, "scripts");
-        initScriptDir(xdg.path(XDG_CONFIG_HOME, "scripts"));
+        notify_init("kbdex");
 }
 
 void
@@ -198,9 +193,9 @@ MacroDaemon::notify(string title, string msg, string icon, NotifyUrgency urgency
         last_notification = notif;
 
         NotifyNotification *n = notify_notification_new(title.c_str(), msg.c_str(), icon.c_str());
-        notify_notification_set_timeout(n, 12000);
+        notify_notification_set_timeout(n, 10000);
         notify_notification_set_urgency(n, urgency);
-        notify_notification_set_app_name(n, "Hawck");
+        notify_notification_set_app_name(n, "kbdex");
 
         if (!notify_notification_show(n, nullptr)) {
                 syslog(LOG_INFO, "Notifications cannot be shown.");
@@ -213,7 +208,7 @@ handleSigPipe(int)
 
 #if 0
 static void handleSigTerm(int) {
-    macrod_main_loop_running = false;
+    kbdexCore_main_loop_running = false;
 }
 #endif
 
@@ -317,7 +312,7 @@ MacroDaemon::startScriptWatcher()
 void
 MacroDaemon::run()
 {
-        syslog(LOG_INFO, "Setting up MacroDaemon ...");
+        syslog(LOG_INFO, "kbdex | kbdexCore: Setting up kbdexCore ...");
 
         // FIXME: Need to handle socket timeouts before I can use this SIGTERM handler.
         //signal(SIGTERM, handleSigTerm);
@@ -351,7 +346,7 @@ MacroDaemon::run()
 
         syslog(LOG_INFO, "Starting main loop");
 
-        while (macrod_main_loop_running) {
+        while (kbdexCore_main_loop_running) {
                 try {
                         bool repeat = true;
 
@@ -378,12 +373,12 @@ MacroDaemon::run()
                         // Reset connection
                         syslog(LOG_ERR, "Socket error: %s", e.what());
                         notify("Socket error",
-                               "Connection to InputD timed out, reconnecting ...",
-                               "hawck",
+                               "Connection to kbdexKeyboardAgent timed out, reconnecting ...",
+                               "kbdex",
                                NOTIFY_URGENCY_NORMAL);
                         getConnection();
                 }
         }
 
-        syslog(LOG_INFO, "macrod exiting ...");
+        syslog(LOG_INFO, "kbdex | kbdexCore exiting ...");
 }

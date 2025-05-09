@@ -37,10 +37,11 @@
 #include "utils.hpp"
 #include <fstream>
 #include <iostream>
-#if MESON_COMPILE
-#include <hawck_config.h>
-#else
-#define MACROD_VERSION "unknown"
+
+#include "kbdex_config.h"
+
+#ifndef KBDEX_VERSION
+#define KBDEX_VERSION "unknown"
 #endif
 
 extern "C" {
@@ -57,7 +58,7 @@ static int no_fork;
 int
 main(int argc, char *argv[])
 {
-        string HELP = "Usage: hawck-macrod [--no-fork]\n"
+        string HELP = "Usage: kbdexCore [--no-fork]\n"
                       "\n"
                       "Options:\n"
                       "  --no-fork   Don't daemonize/fork.\n"
@@ -80,7 +81,7 @@ main(int argc, char *argv[])
         unordered_map<string, function<void(const string &opt)>> long_handlers = {
                 { "version",
                   [&](const string &) {
-                          cout << "hawck-macrod v" MACROD_VERSION << endl;
+                          cout << "kbdexCore | kbdex v" KBDEX_VERSION << endl;
                           exit(0);
                   } },
         };
@@ -121,14 +122,14 @@ main(int argc, char *argv[])
         umask(0022);
 
         if (!no_fork) {
-                cout << "hawck-macrod v" MACROD_VERSION " forking ..." << endl;
+                cout << "kbdex v" KBDEX_VERSION " | kbdexCore: forking..." << endl;
                 xdg.mkpath(0700, XDG_DATA_HOME, "logs");
-                daemonize(xdg.path(XDG_DATA_HOME, "logs", "macrod.log"));
+                daemonize(xdg.path(XDG_DATA_HOME, "logs", "kbdexCore.log"));
         }
 
         // Kill any alread-running instance of macrod and write the new pid to the
         // pidfile.
-        string pid_file = xdg.path(XDG_RUNTIME_DIR, "macrod.pid");
+        string pid_file = xdg.path(XDG_RUNTIME_DIR, "kbdexCore.pid");
         killPretender(pid_file);
 
         MacroDaemon daemon;
@@ -136,7 +137,7 @@ main(int argc, char *argv[])
                 daemon.run();
         } catch (exception &e) {
                 cout << e.what() << endl;
-                syslog(LOG_CRIT, "macrod: %s", e.what());
+                syslog(LOG_CRIT, "kbdexCore: %s", e.what());
                 clearPidFile(pid_file);
                 throw;
         }

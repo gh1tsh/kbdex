@@ -36,9 +36,14 @@ set(KBDEX_CORE_SRC
 )
 
 add_executable(kbdexCore ${KBDEX_CORE_SRC})
+
 target_link_libraries(kbdexCore
     PkgConfig::LIBNOTIFY
     Threads::Threads
+)
+
+target_include_directories(kbdexCore
+    PRVATE ${CMAKE_BINARY_DIR}
 )
 
 # install(TARGETS hawck-macrod)
