@@ -57,8 +57,13 @@ set(KBDEX_KEYBOARD_AGENT_SRC
 )
 
 add_executable(kbdexKeyboardAgent ${KBDEX_KEYBOARD_AGENT_SRC})
+
 target_link_libraries(kbdexKeyboardAgent
     Threads::Threads
+)
+
+target_include_directories(kbdexKeyboardAgent
+    PRIVATE ${CMAKE_BINARY_DIR}
 )
 
 # install(TARGETS kbdexKeyboardAgent)

@@ -13,6 +13,3 @@ project(
 configure_file(cmake/kbdex_config.h.in ${CMAKE_BINARY_DIR}/kbdex_config.h @ONLY)
 
 add_subdirectory(SourceCode)
-
-# Включаем директорию с артефактами CMake в список include-директорий
-include_directories(${CMAKE_BINARY_DIR})

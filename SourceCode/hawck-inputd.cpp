@@ -39,7 +39,7 @@
 #include "KBDDaemon.hpp"
 #include "utils.hpp"
 
-#include <hawck_config.h>
+#include "kbdex_config.h"
 
 #ifndef KBDEX_VERSION
 #define KBDEX_VERSION "unknown"
@@ -147,7 +147,7 @@ main(int argc, char *argv[])
         unordered_map<string, function<void(const string &opt)>> long_handlers = {
                 { "version",
                   [&](const string &) {
-                          cout << "kbdexKeyboardAgent v" INPUTD_VERSION << endl;
+                          cout << "kbdex v" KBDEX_VERSION << endl;
                           exit(0);
                   } },
                 NUM_OPTION(udev_event_delay) NUM_OPTION(socket_timeout)
