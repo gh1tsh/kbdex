@@ -16,7 +16,6 @@ AlignConsecutiveDeclarations:
   Enabled: true
   AcrossEmptyLines: false
   AcrossComments: true
-  AlignFunctionDeclarations: false # Возможно, стоит удалить, так как в некоторых окружениях clang-format не поддерживает эту опцию
   AlignFunctionPointers: true
 
 AlignConsecutiveAssignments:
