@@ -312,31 +312,13 @@ MacroDaemon::startScriptWatcher()
 void
 MacroDaemon::run()
 {
-        syslog(LOG_INFO, "kbdex | kbdexCore: Setting up kbdexCore ...");
+        syslog(LOG_INFO, "kbdex v" + KBDEX_VERSION + " | kbdexCore: Setting up kbdexCore ...");
 
         // FIXME: Need to handle socket timeouts before I can use this SIGTERM handler.
         //signal(SIGTERM, handleSigTerm);
 
         signal(SIGPIPE, handleSigPipe);
 
-
-        // Setup/start LuaConfig
-        xdg.mkfifo("lua-comm.fifo");
-        xdg.mkfifo("json-comm.fifo");
-
-        LuaConfig conf(xdg.path(XDG_RUNTIME_DIR, "lua-comm.fifo"),
-                       xdg.path(XDG_RUNTIME_DIR, "json-comm.fifo"),
-                       xdg.path(XDG_DATA_HOME, "cfg.lua"));
-        conf.addOption("notify_on_err", &notify_on_err);
-        conf.addOption("stop_on_err", &stop_on_err);
-        conf.addOption("eval_keydown", &eval_keydown);
-        conf.addOption("eval_keyup", &eval_keyup);
-        conf.addOption("eval_repeat", &eval_repeat);
-        conf.addOption("disabled", &disabled);
-        conf.addOption<string>("keymap", [this](string) { reloadAll(); });
-        conf.start();
-
-        startScriptWatcher();
 
         KBDAction           action;
         struct input_event &ev = action.ev;
@@ -380,5 +362,5 @@ MacroDaemon::run()
                 }
         }
 
-        syslog(LOG_INFO, "kbdex | kbdexCore exiting ...");
+        syslog(LOG_INFO, "kbdex v" KBDEX_VERSION + " | kbdexCore exiting ...");
 }

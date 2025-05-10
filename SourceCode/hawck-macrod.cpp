@@ -71,7 +71,7 @@ main(int argc, char *argv[])
                                                 { "no-fork", no_argument, &no_fork, 1 },
                                                 { "version", no_argument, 0, 0 },
                                                 /* These options don’t set a flag.
-               We distinguish them by their indices. */
+                                                   We distinguish them by their indices. */
                                                 { "help", no_argument, 0, 'h' },
                                                 { 0, 0, 0, 0 }
         };
@@ -127,7 +127,7 @@ main(int argc, char *argv[])
                 daemonize(xdg.path(XDG_DATA_HOME, "logs", "kbdexCore.log"));
         }
 
-        // Kill any alread-running instance of macrod and write the new pid to the
+        // Kill any alread-running instance of kbdexCore and write the new pid to the
         // pidfile.
         string pid_file = xdg.path(XDG_RUNTIME_DIR, "kbdexCore.pid");
         killPretender(pid_file);
