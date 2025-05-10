@@ -180,12 +180,12 @@ Keyboard::get(Packet *packet)
         }
 
         ssize_t n;
-        if ((n = read(fd, &packet.kbd_event->ev, sizeof(packet.kbd_event->ev))) != sizeof(packet.kbd_event->ev)) {
+        if ((n = read(fd, &packet->kbd_event.ev, sizeof(packet->kbd_event.ev))) != sizeof(packet->kbd_event.ev)) {
                 stringstream err("read() failed, returned: ");
                 err << n << ": " << strerror(errno);
                 throw KeyboardError(err.str());
         }
-        packet.kbd_event->dev_id = this->dev_id;
+        packet->kbd_event.dev_id = this->dev_id;
 }
 
 void

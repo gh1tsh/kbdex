@@ -75,7 +75,7 @@ KBDManager::getEvent(Packet *packet)
                 int idx = kbdMultiplex(kbds, 64);
                 if (idx != -1) {
                         kbd = kbds[idx];
-                        kbd->get(action);
+                        kbd->get(packet);
 
                         // Throw away the key if the keyboard isn't locked yet.
                         if (kbd->getState() == KBDState::LOCKED)
