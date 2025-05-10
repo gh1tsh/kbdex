@@ -33,7 +33,7 @@
 
 #include "RemoteUDevice.hpp"
 
-RemoteUDevice::RemoteUDevice(UNIXSocket<KBDAction> *conn)
+RemoteUDevice::RemoteUDevice(UNIXSocket<Packet> *conn)
 {
         this->conn = conn;
 }
@@ -45,22 +45,22 @@ RemoteUDevice::~RemoteUDevice() {}
 void
 RemoteUDevice::emit(int type, int code, int val)
 {
-        KBDAction ac;
-        memset(&ac, 0, sizeof(ac));
-        ac.ev.type  = type;
-        ac.ev.code  = code;
-        ac.ev.value = val;
-        evbuf.push_back(ac);
+        Packet packet;
+        memset(&packet, 0, sizeof(packet));
+        packet.kbd_event.ev.type  = type;
+        packet.kbd_event.ev.code  = code;
+        packet.kbd_event.ev.value = val;
+        evbuf.push_back(packet);
 }
 
 void
 RemoteUDevice::emit(const input_event *send_event)
 {
-        KBDAction ac;
-        memset(&ac, 0, sizeof(ac));
-        memcpy(&ac.ev, send_event, sizeof(*send_event));
-        ac.done = 0;
-        evbuf.push_back(ac);
+        Packet packet;
+        memset(&packet, 0, sizeof(packet));
+        memcpy(&packet.kbd_event.ev, send_event, sizeof(*send_event));
+        packet.kbd_event.done = 0;
+        evbuf.push_back(packet);
 }
 
 void
@@ -80,8 +80,8 @@ RemoteUDevice::done()
         if (!conn)
                 return;
         flush();
-        KBDAction ac;
-        memset(&ac, 0, sizeof(ac));
-        ac.done = 1;
-        conn->send(&ac);
+        Packet packet;
+        memset(&packet, 0, sizeof(packet));
+        packet.kbd_event.done = 1;
+        conn->send(&packet);
 }

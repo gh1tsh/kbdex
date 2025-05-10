@@ -53,7 +53,7 @@ extern "C" {
 }
 
 #include "FSWatcher.hpp"
-#include "KBDAction.hpp"
+#include "Packet.hpp"
 
 class KeyboardError : public std::runtime_error
 {
@@ -178,7 +178,7 @@ public:
      *
      * This call will block until a key is pressed.
      */
-        void get(KBDAction *action);
+        void get(Packet *packet);
 
         /** Get human-readable name of the keyboard device.
      *

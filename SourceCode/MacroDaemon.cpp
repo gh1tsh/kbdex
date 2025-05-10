@@ -83,7 +83,7 @@ MacroDaemon::getConnection()
         for (;;) {
                 try {
                         int fd  = kbd_srv.accept();
-                        kbd_com = new UNIXSocket<KBDAction>(fd);
+                        kbd_com = new UNIXSocket<Packet>(fd);
                         syslog(LOG_INFO, "Got a connection");
                         break;
                 } catch (SocketError &e) {
@@ -103,78 +103,6 @@ MacroDaemon::~MacroDaemon()
                 delete s;
         }
 }
-
-void
-MacroDaemon::initScriptDir(const std::string &dir_path)
-{
-        for (auto entry : fs::directory_iterator(dir_path)) {
-                try {
-                        loadScript(entry.path());
-                } catch (exception &e) {
-                        notify("Hawck Script Error", e.what(), "hawck", NOTIFY_URGENCY_CRITICAL);
-                        syslog(LOG_ERR,
-                               "Unable to load script '%s': %s",
-                               pathBasename(entry.path()).c_str(),
-                               e.what());
-                }
-        }
-        fsw.addFrom(dir_path);
-}
-
-void
-MacroDaemon::loadScript(const std::string &path)
-{
-        if (stringStartsWith(path, ".") ||
-            !(stringEndsWith(path, ".lua") || stringEndsWith(path, ".hwk"))) {
-                syslog(LOG_NOTICE,
-                       "Not loading: %s, filename must end in .lua or .hwk and may not start with "
-                       "a leading '.'",
-                       path.c_str());
-                return;
-        }
-
-        auto rpath = realpath_safe(path);
-        if (!checkFile(rpath, "frwxr-xr-x ~:*"))
-                return;
-
-        auto sc    = mkuniq(new Script());
-        auto chdir = xdg.cd(XDG_DATA_HOME, "scripts");
-        sc->call("require", "init");
-        sc->open(&remote_udev, "udev");
-        if (stringEndsWith(path, ".hwk")) {
-                sc->exec(pathBasename(path), (Popen("hwk2lua", path)).readOnce());
-        } else if (stringEndsWith(path, ".lua")) {
-                sc->from(path);
-        }
-        auto name = pathBasename(path);
-        if (scripts.find(name) != scripts.end()) {
-                delete scripts[name];
-                scripts.erase(name);
-        }
-        syslog(LOG_INFO, "Loaded script: %s", path.c_str());
-        notify(pathBasename(path), "<i>Loaded</i> script");
-        scripts[name] = sc.release();
-}
-
-void
-MacroDaemon::unloadScript(const std::string &rel_path) noexcept
-{
-        string name = pathBasename(rel_path);
-        if (scripts.find(name) != scripts.end()) {
-                syslog(LOG_INFO, "Deleting script: %s", name.c_str());
-                delete scripts[name];
-                scripts.erase(name);
-                notify(name, "<i>Unloaded</i> script");
-        } else {
-                syslog(LOG_ERR, "Attempted to delete non-existent script: %s", name.c_str());
-        }
-}
-
-struct script_error_info
-{
-        lua_Debug ar;
-        char      path[];
-};
 
 void
 MacroDaemon::notify(string title, string msg)
@@ -211,39 +139,6 @@ static void handleSigTerm(int) {
     kbdexCore_main_loop_running = false;
 }
 #endif
-
-bool
-MacroDaemon::runScript(Lua::Script *sc, const struct input_event &ev, string kbd_hid)
-{
-        static bool had_stack_leak_warning = false;
-        bool        repeat                 = true;
-
-        try {
-                auto [succ] =
-                    sc->call<bool>("__match", (int)ev.value, (int)ev.code, (int)ev.type, kbd_hid);
-                if (lua_gettop(sc->getL()) != 0) {
-                        if (!had_stack_leak_warning) {
-                                syslog(LOG_WARNING,
-                                       "API misuse causing Lua stack leak of %d elements.",
-                                       lua_gettop(sc->getL()));
-                                // Don't spam system logs:
-                                had_stack_leak_warning = true;
-                        }
-                        lua_settop(sc->getL(), 0);
-                }
-                repeat = !succ;
-        } catch (const LuaError &e) {
-                if (stop_on_err)
-                        sc->setEnabled(false);
-                std::string report = e.fmtReport();
-                if (notify_on_err)
-                        notify("Lua error", report, "hawck", NOTIFY_URGENCY_CRITICAL);
-                syslog(LOG_ERR, "LUA:%s", report.c_str());
-                repeat = true;
-        }
-
-        return repeat;
-}
 
 void
 MacroDaemon::reloadAll()
@@ -320,37 +215,43 @@ MacroDaemon::run()
         signal(SIGPIPE, handleSigPipe);
 
 
-        KBDAction           action;
-        struct input_event &ev = action.ev;
+        PacketType          packet;
+        struct input_event &ev = packet.kbd_event.ev;
         KBDB                kbdb;
 
         getConnection();
 
-        syslog(LOG_INFO, "Starting main loop");
+        syslog(LOG_INFO, "kbdex v" + KBDEX_VERSION + " | kbdexCore: Starting main loop");
 
         while (kbdexCore_main_loop_running) {
                 try {
                         bool repeat = true;
 
-                        kbd_com->recv(&action);
-                        string kbd_hid = kbdb.getID(&action.dev_id);
+                        kbd_com->recv(&packet);
 
-                        if (!((!eval_keydown && ev.value == 1) || (!eval_keyup && ev.value == 0)) &&
-                            !disabled) {
-                                lock_guard<mutex> lock(scripts_mtx);
-                                // Look for a script match.
-                                for (auto &[_, sc] : scripts) {
-                                        (void)_;
-                                        if (sc->isEnabled() &&
-                                            !(repeat = runScript(sc, ev, kbd_hid)))
-                                                break;
+                        if (packet.type == PacketType::Command) {
+                                // TODO: реализовать обработку команд
+                                continue;
+                        } else if (packet.type == PacketType::KeyboardEvent) {
+                                string kbd_hid = kbdb.getID(&packet.kbd_event.dev_id);
+
+                                if (!((!eval_keydown && ev.value == 1) ||
+                                    (!eval_keyup && ev.value == 0)) && !disabled) {
+                                        lock_guard<mutex> lock(scripts_mtx);
+                                        // Look for a script match.
+                                        for (auto &[_, sc] : scripts) {
+                                                (void)_;
+                                                if (sc->isEnabled() &&
+                                                    !(repeat = runScript(sc, ev, kbd_hid)))
+                                                        break;
+                                        }
                                 }
+
+                                if (repeat)
+                                        remote_udev.emit(&ev);
+
+                                remote_udev.done();
                         }
-
-                        if (repeat)
-                                remote_udev.emit(&ev);
-
-                        remote_udev.done();
                 } catch (const SocketError &e) {
                         // Reset connection
                         syslog(LOG_ERR, "Socket error: %s", e.what());

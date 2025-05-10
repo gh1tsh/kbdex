@@ -63,7 +63,7 @@ KBDManager::setup()
 }
 
 bool
-KBDManager::getEvent(KBDAction *action)
+KBDManager::getEvent(Packet *packet)
 {
         Keyboard *kbd     = nullptr;
         bool      had_key = false;

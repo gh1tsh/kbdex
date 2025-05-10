@@ -82,7 +82,7 @@ private:
         std::unordered_map<std::string, std::vector<int> *> key_sources;
         // std::unordered_map<std::string, Lua::Script *>      scripts;
         // const std::string     scripts_dir = "/var/lib/kbdexKeyboardAgent/scripts";
-        UNIXSocket<KBDAction> kbd_com;
+        UNIXSocket<Packet> kbd_com;
         UDevice               udev;
         /** Watcher for /var/lib/hawck/keys */
         FSWatcher             keys_fsw;

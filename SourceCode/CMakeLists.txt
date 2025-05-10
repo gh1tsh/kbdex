@@ -43,7 +43,7 @@ target_link_libraries(kbdexCore
 )
 
 target_include_directories(kbdexCore
-    PRVATE ${CMAKE_BINARY_DIR}
+    PRIVATE ${CMAKE_BINARY_DIR}
 )
 
 # install(TARGETS hawck-macrod)

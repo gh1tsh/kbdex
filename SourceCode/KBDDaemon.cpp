@@ -173,47 +173,47 @@ KBDDaemon::startPassthroughWatcher()
 void
 KBDDaemon::run()
 {
-        KBDAction action;
-        memset(&action, '\0', sizeof(action));
+        Packet packet;
+        memset(&packet, '\0', sizeof(packet));
         setup();
         startPassthroughWatcher();
         kbman.setup();
         kbman.startHotplugWatcher();
 
         for (;;) {
-                action.done = 0;
-                if (!kbman.getEvent(&action))
+                packet.kbd_event.done = 0;
+                if (!kbman.getEvent(&packet))
                         continue;
 
-                if (action.ev.type != EV_KEY) {
-                        udev.emit(&action.ev);
+                if (packet.kbd_event.ev.type != EV_KEY) {
+                        udev.emit(&packet.kbd_event.ev);
                         udev.flush();
                         continue;
                 }
 
                 // Check if the key is listed in the passthrough set.
                 KeyVisibility key_vis;
-                if (action.ev.code >= KEY_MAX) {
-                        syslog(LOG_ERR, "Received key was out of range: %d", action.ev.code);
+                if (packet.kbd_event.ev.code >= KEY_MAX) {
+                        syslog(LOG_ERR, "Received key was out of range: %d", packet.kbd_event.ev.code);
                         key_vis = KEY_HIDE;
                 } else {
-                        key_vis = key_visibility[action.ev.code];
-                        ks_combo.check(action);
+                        key_vis = key_visibility[packet.kbd_event.ev.code];
+                        ks_combo.check(packet);
                 }
 
                 if (!ks_combo.active && key_vis == KEY_SHOW) {
-                        input_event orig_ev = action.ev;
+                        input_event orig_ev = packet.kbd_event.ev;
 
                         // Pass key to Lua executor
                         try {
-                                kbd_com.send(&action);
+                                kbd_com.send(&packet);
 
                                 // Receive keys to emit from the macro daemon.
                                 for (;;) {
-                                        kbd_com.recv(&action, timeout);
-                                        if (action.done)
+                                        kbd_com.recv(&packet, timeout);
+                                        if (packet.kbd_event.done)
                                                 break;
-                                        udev.emit(&action.ev);
+                                        udev.emit(&packet.kbd_event.ev);
                                 }
                                 // Flush received keys and continue on.
                                 udev.flush();
@@ -236,7 +236,7 @@ KBDDaemon::run()
                         }
                 }
 
-                udev.emit(&action.ev);
+                udev.emit(&packet.kbd_event.ev);
                 udev.flush();
         }
 }

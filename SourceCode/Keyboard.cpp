@@ -125,12 +125,12 @@ Keyboard::numDown() const
 void
 Keyboard::lockSync()
 {
-        KBDAction action;
+        Packet packet;
 
         syslog(LOG_INFO, "Locking keyboard synchronously ...");
 
         while (numDown() > 0)
-                get(&action);
+                get(&packet);
 
         int grab = 1;
         if (ioctl(fd, EVIOCGRAB, &grab) == -1)
@@ -168,7 +168,7 @@ Keyboard::unlock()
 }
 
 void
-Keyboard::get(KBDAction *action)
+Keyboard::get(Packet *packet)
 {
         // Wait until key down events have been eliminated.
         if (state == KBDState::LOCKING && !numDown()) {
@@ -180,12 +180,12 @@ Keyboard::get(KBDAction *action)
         }
 
         ssize_t n;
-        if ((n = read(fd, &action->ev, sizeof(action->ev))) != sizeof(action->ev)) {
+        if ((n = read(fd, &packet.kbd_event->ev, sizeof(packet.kbd_event->ev))) != sizeof(packet.kbd_event->ev)) {
                 stringstream err("read() failed, returned: ");
                 err << n << ": " << strerror(errno);
                 throw KeyboardError(err.str());
         }
-        action->dev_id = this->dev_id;
+        packet.kbd_event->dev_id = this->dev_id;
 }
 
 void

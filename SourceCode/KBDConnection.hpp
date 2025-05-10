@@ -35,7 +35,7 @@
  * @brief File system watcher (inotify)
  */
 
-#include "KBDAction.hpp"
+#include "Packet.hpp"
 #include <string>
 
 /** Persistent connection to a keyboard server, a daemon
@@ -57,5 +57,5 @@ public:
         /** Close connection */
         void close();
         /** Send packet */
-        void send(const KBDAction *action);
+        void send(const Packet *packet);
 };

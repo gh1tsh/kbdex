@@ -116,5 +116,5 @@ public:
 
         void setup();
 
-        bool getEvent(KBDAction *action);
+        bool getEvent(Packet *packet);
 };

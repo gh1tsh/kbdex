@@ -47,7 +47,7 @@ extern "C" {
 #include <unistd.h>
 }
 #include "IUDevice.hpp"
-#include "KBDAction.hpp"
+#include "Packet.hpp"
 #include "UNIXSocket.hpp"
 #include <stdexcept>
 #include <stdio.h>
@@ -60,11 +60,11 @@ extern "C" {
 class RemoteUDevice : public IUDevice
 {
 private:
-        UNIXSocket<KBDAction> *conn = nullptr;
-        std::vector<KBDAction> evbuf;
+        UNIXSocket<Packet> *conn = nullptr;
+        std::vector<Packet> evbuf;
 
 public:
-        explicit RemoteUDevice(UNIXSocket<KBDAction> *conn);
+        explicit RemoteUDevice(UNIXSocket<Packet> *conn);
 
         RemoteUDevice();
 
@@ -78,5 +78,5 @@ public:
 
         virtual void flush() override;
 
-        inline void setConnection(UNIXSocket<KBDAction> *conn) { this->conn = conn; }
+        inline void setConnection(UNIXSocket<Packet> *conn) { this->conn = conn; }
 };
