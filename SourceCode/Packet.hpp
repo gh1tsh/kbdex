@@ -23,7 +23,7 @@ enum class Command
 {
         PING,
         PONG,
-}
+};
 
 /**
  * Структура, описывающая пакеты, которые используются для взаимодействия между kbdexKeyboardAgent

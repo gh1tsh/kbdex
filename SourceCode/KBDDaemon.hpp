@@ -113,8 +113,6 @@ public:
 
         void initPassthrough();
 
-        void handleKillswitch(const KBDAction &action) noexcept;
-
         /**
          * Load passthrough keys from a file at `path`.
          *

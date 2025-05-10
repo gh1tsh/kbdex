@@ -33,7 +33,7 @@
 
 #pragma once
 
-#include "KBDAction.hpp"
+#include "Packet.hpp"
 #include "KeyValue.hpp"
 #include <assert.h>
 #include <limits.h>
@@ -55,20 +55,20 @@ struct KeyCombo
                 key_seq.pop_back();
         }
 
-        inline bool check(const KBDAction &action) noexcept
+        inline bool check(const Packet &packet) noexcept
         {
-                if (action.ev.value == KEY_VAL_REPEAT)
+                if (packet.kbd_event.ev.value == KEY_VAL_REPEAT)
                         return false;
 
-                if (num_seq == ((int)key_seq.size()) && action.ev.code == activator &&
-                    action.ev.value == KEY_VAL_DOWN) {
+                if (num_seq == ((int)key_seq.size()) && packet.kbd_event.ev.code == activator &&
+                    packet.kbd_event.ev.value == KEY_VAL_DOWN) {
                         num_seq = 0;
                         return true;
                 }
 
                 for (auto k : key_seq) {
-                        if (k == action.ev.code) {
-                                num_seq += (action.ev.value == KEY_VAL_DOWN) ? 1 : -1;
+                        if (k == packet.kbd_event.ev.code) {
+                                num_seq += (packet.kbd_event.ev.value == KEY_VAL_DOWN) ? 1 : -1;
                                 break;
                         }
                 }
@@ -86,9 +86,9 @@ struct KeyComboToggle : public KeyCombo
 
         inline KeyComboToggle(const std::vector<int> &seq) noexcept : KeyCombo(seq) {}
 
-        inline bool check(const KBDAction &action) noexcept
+        inline bool check(const Packet &packet) noexcept
         {
-                if (KeyCombo::check(action))
+                if (KeyCombo::check(packet))
                         active = !active;
                 return active;
         }
