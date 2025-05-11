@@ -174,7 +174,7 @@ void
 KBDDaemon::run()
 {
 #ifdef MODE_COMMUNICATION_CHECK
-        syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexKeyboardAgent: Функционирование в режиме проверки связи");
+        syslog(LOG_INFO, "kbdex v%s | kbdexKeyboardAgent: Функционирование в режиме проверки связи", KBDEX_VERSION);
 #endif
         Packet packet;
         memset(&packet, '\0', sizeof(packet));
@@ -188,10 +188,10 @@ KBDDaemon::run()
         bool pongSentFlag = false;
 #endif
 
-        syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexKeyboardAgent: Старт главного цикла");
+        syslog(LOG_INFO, "kbdex v%s | kbdexKeyboardAgent: Старт главного цикла", KBDEX_VERSION);
 
 #ifdef MODE_COMMUNICATION_CHECK
-        syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexKeyboardAgent: Подготовка к получению команды PING");
+        syslog(LOG_INFO, "kbdex v%s | kbdexKeyboardAgent: Подготовка к получению команды PING", KBDEX_VERSION);
 #endif
 
         for (;;) {
@@ -200,10 +200,10 @@ KBDDaemon::run()
 
                 // kbdexKeyboardAgent запускается после kbdexCore, поэтому сначала ожидаем PING
                 if (!pingRecvFlag) {
-                        kbd_com->recv(&packet);
+                        kbd_com.recv(&packet);
 
                         if (packet.type == PacketType::Command && packet.cmd.command == Command::PING) {
-                                syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexKeyboardAgent: Получена команда PING c данными '%s'", packet.cmd.payload);
+                                syslog(LOG_INFO, "kbdex v%s | kbdexKeyboardAgent: Получена команда PING c данными '%s'", KBDEX_VERSION, packet.cmd.payload);
 
                                 pingRecvFlag = true;
                         }
@@ -214,9 +214,9 @@ KBDDaemon::run()
                                 packet.cmd.command = Command::PONG;
                                 packet.cmd.payload = "TEST";
 
-                                kbd_com->send(&packet);
+                                kbd_com.send(&packet);
 
-                                syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexKeyboardAgent: Отправлена команда PONG");
+                                syslog(LOG_INFO, "kbdex v%s | kbdexKeyboardAgent: Отправлена команда PONG", KBDEX_VERSION);
                         }
 
                         if (pingRecvFlag && pongSentFlag) {

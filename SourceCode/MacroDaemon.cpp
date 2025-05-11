@@ -207,9 +207,9 @@ MacroDaemon::startScriptWatcher()
 void
 MacroDaemon::run()
 {
-        syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexCore: Setting up kbdexCore ...");
+        syslog(LOG_INFO, "kbdex v%s | kbdexCore: Setting up kbdexCore ...", KBDEX_VERSION);
 #ifdef MODE_COMMUNICATION_CHECK
-        syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexCore: Функционирование в режиме проверки связи");
+        syslog(LOG_INFO, "kbdex v%s | kbdexCore: Функционирование в режиме проверки связи", KBDEX_VERSION);
 #endif
         // FIXME: Need to handle socket timeouts before I can use this SIGTERM handler.
         //signal(SIGTERM, handleSigTerm);
@@ -228,10 +228,10 @@ MacroDaemon::run()
 
         getConnection();
 
-        syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexCore: Starting main loop");
+        syslog(LOG_INFO, "kbdex v%s | kbdexCore: Starting main loop", KBDEX_VERSION);
 
 #ifdef MODE_COMMUNICATION_CHECK
-        syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexCore: Подготовка к отправке команды PING");
+        syslog(LOG_INFO, "kbdex v%s | kbdexCore: Подготовка к отправке команды PING", KBDEX_VERSION);
 #endif
 
         while (kbdexCore_main_loop_running) {
@@ -250,7 +250,7 @@ MacroDaemon::run()
 
                                 pingSendFlag = true;
 
-                                syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexCore: Команда PING отправлена. Ожидание команды PONG от kbdexKeyboardAgent...");
+                                syslog(LOG_INFO, "kbdex v%s | kbdexCore: Команда PING отправлена. Ожидание команды PONG от kbdexKeyboardAgent...", KBDEX_VERSION);
 
                                 continue;
                         }
@@ -262,7 +262,7 @@ MacroDaemon::run()
                         }
 
                         if (packet.type == PacketType::Command) {
-                                syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexCore: Получена команда PONG");
+                                syslog(LOG_INFO, "kbdex v%s | kbdexCore: Получена команда PONG", KBDEX_VERSION);
                         }
 
                         if (pingSentFlag && pongRecvFlag) {
@@ -309,5 +309,5 @@ MacroDaemon::run()
                 }
         }
 
-        syslog(LOG_INFO, "kbdex v" std::string(KBDEX_VERSION) + " | kbdexCore exiting ...");
+        syslog(LOG_INFO, "kbdex v%s | kbdexCore exiting ...", KBDEX_VERSION);
 }
