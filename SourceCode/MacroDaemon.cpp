@@ -204,8 +204,6 @@ MacroDaemon::run()
                                 pingSentFlag = true;
 
                                 syslog(LOG_INFO, "kbdex v%s | kbdexCore: Команда PING отправлена. Ожидание команды PONG от kbdexKeyboardAgent...", KBDEX_VERSION);
-
-                                continue;
                         }
 
                         if (pingSentFlag) {
@@ -217,7 +215,7 @@ MacroDaemon::run()
                         }
 
                         if (packet.type == PacketType::Command) {
-                                syslog(LOG_INFO, "kbdex v%s | kbdexCore: Получена команда PONG", KBDEX_VERSION);
+                                syslog(LOG_INFO, "kbdex v%s | kbdexCore: Получена команда PONG c данными '%s'", KBDEX_VERSION, packet.cmd.payload);
                         }
 
                         // Отправляем и получаем команды раз в 5 секунд

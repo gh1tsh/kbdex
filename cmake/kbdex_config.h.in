@@ -14,4 +14,8 @@
  */
 #cmakedefine MODE_COMMUNICATION_CHECK
 
+#ifdef MODE_COMMUNICATION_CHECK
+#warning Сборка программы выполняется с режимом проверки связи (MODE_COMMUNICATION_CHECK)!
+#endif
+
 #endif // KBDEX_CONFIG_H
