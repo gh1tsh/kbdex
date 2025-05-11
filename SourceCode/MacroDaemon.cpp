@@ -171,7 +171,7 @@ MacroDaemon::run()
         signal(SIGPIPE, handleSigPipe);
 
 
-        PacketType          packet;
+        Packet              packet;
         struct input_event &ev = packet.kbd_event.ev;
         KBDB                kbdb;
 
