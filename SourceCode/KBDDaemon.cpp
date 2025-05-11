@@ -185,7 +185,6 @@ KBDDaemon::run()
 
 #ifdef MODE_COMMUNICATION_CHECK
         bool pingRecvFlag = false;
-        bool pongSentFlag = false;
 #endif
 
         syslog(LOG_INFO, "kbdex v%s | kbdexKeyboardAgent: Старт главного цикла", KBDEX_VERSION);
@@ -217,12 +216,12 @@ KBDDaemon::run()
                                 kbd_com.send(&packet);
 
                                 syslog(LOG_INFO, "kbdex v%s | kbdexKeyboardAgent: Отправлена команда PONG", KBDEX_VERSION);
+
+                                pingRecvFlag = false;
                         }
 
-                        if (pingRecvFlag && pongSentFlag) {
-                                // Отправляем и получаем команды раз в 5 секунд
-                                sleep(5);
-                        }
+                        // Отправляем и получаем команды раз в 5 секунд
+                        sleep(5);
                 }
 #else
                 packet.kbd_event.done = 0;

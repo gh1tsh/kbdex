@@ -177,7 +177,6 @@ MacroDaemon::run()
 
 #ifdef MODE_COMMUNICATION_CHECK
         bool pingSentFlag = false;
-        bool pongRecvFlag = false;
 #endif
 
         getConnection();
@@ -209,20 +208,20 @@ MacroDaemon::run()
                                 continue;
                         }
 
-                        if (!pongRecvFlag) {
+                        if (pingSentFlag) {
                                 memset(&packet, '\0', sizeof(packet));
                                 // После отправки PING ожидаем команду PONG в ответ.
                                 kbd_com->recv(&packet);
+
+                                pingSentFlag = false;
                         }
 
                         if (packet.type == PacketType::Command) {
                                 syslog(LOG_INFO, "kbdex v%s | kbdexCore: Получена команда PONG", KBDEX_VERSION);
                         }
 
-                        if (pingSentFlag && pongRecvFlag) {
-                                // Отправляем и получаем команды раз в 5 секунд
-                                sleep(5);
-                        }
+                        // Отправляем и получаем команды раз в 5 секунд
+                        sleep(5);
 #else
                         bool repeat = true;
 
