@@ -173,6 +173,9 @@ KBDDaemon::startPassthroughWatcher()
 void
 KBDDaemon::run()
 {
+#ifdef MODE_COMMUNICATION_CHECK
+        syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexKeyboardAgent: Функционирование в режиме проверки связи");
+#endif
         Packet packet;
         memset(&packet, '\0', sizeof(packet));
         setup();
@@ -180,7 +183,48 @@ KBDDaemon::run()
         kbman.setup();
         kbman.startHotplugWatcher();
 
+#ifdef MODE_COMMUNICATION_CHECK
+        bool pingRecvFlag = false;
+        bool pongSentFlag = false;
+#endif
+
+        syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexKeyboardAgent: Старт главного цикла");
+
+#ifdef MODE_COMMUNICATION_CHECK
+        syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexKeyboardAgent: Подготовка к получению команды PING");
+#endif
+
         for (;;) {
+#ifdef MODE_COMMUNICATION_CHECK
+                memset(&packet, '\0', sizeof(packet));
+
+                // kbdexKeyboardAgent запускается после kbdexCore, поэтому сначала ожидаем PING
+                if (!pingRecvFlag) {
+                        kbd_com->recv(&packet);
+
+                        if (packet.type == PacketType::Command && packet.cmd.command == Command::PING) {
+                                syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexKeyboardAgent: Получена команда PING c данными '%s'", packet.cmd.payload);
+
+                                pingRecvFlag = true;
+                        }
+
+                        if (pingRecvFlag) {
+                                memset(&packet, '\0', sizeof(packet));
+                                packet.type = PacketType::Command;
+                                packet.cmd.command = Command::PONG;
+                                packet.cmd.payload = "TEST";
+
+                                kbd_com->send(&packet);
+
+                                syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexKeyboardAgent: Отправлена команда PONG");
+                        }
+
+                        if (pingRecvFlag && pongSentFlag) {
+                                // Отправляем и получаем команды раз в 5 секунд
+                                sleep(5);
+                        }
+                }
+#else
                 packet.kbd_event.done = 0;
                 if (!kbman.getEvent(&packet))
                         continue;
@@ -238,6 +282,7 @@ KBDDaemon::run()
 
                 udev.emit(&packet.kbd_event.ev);
                 udev.flush();
+#endif
         }
 }
 

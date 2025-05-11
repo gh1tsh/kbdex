@@ -39,9 +39,13 @@
 #include <thread>
 #include <unordered_map>
 
+extern "C" {
+#include <fcntl.h>
+#include <sys/stat.h>
+}
+
 #include "KBDConnection.hpp"
 #include "UNIXSocket.hpp"
-
 #include "FSWatcher.hpp"
 #include "KBDManager.hpp"
 #include "KeyCombo.hpp"
@@ -49,10 +53,8 @@
 #include "SystemError.hpp"
 #include "UDevice.hpp"
 
-extern "C" {
-#include <fcntl.h>
-#include <sys/stat.h>
-}
+#include "kbdex_config.h"
+
 
 // XXX: DO NOT ENABLE THIS FOR NON-DEBUGGING BUILDS
 //      This will log keypresses to stdout

@@ -207,8 +207,10 @@ MacroDaemon::startScriptWatcher()
 void
 MacroDaemon::run()
 {
-        syslog(LOG_INFO, "kbdex v" + KBDEX_VERSION + " | kbdexCore: Setting up kbdexCore ...");
-
+        syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexCore: Setting up kbdexCore ...");
+#ifdef MODE_COMMUNICATION_CHECK
+        syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexCore: Функционирование в режиме проверки связи");
+#endif
         // FIXME: Need to handle socket timeouts before I can use this SIGTERM handler.
         //signal(SIGTERM, handleSigTerm);
 
@@ -219,12 +221,55 @@ MacroDaemon::run()
         struct input_event &ev = packet.kbd_event.ev;
         KBDB                kbdb;
 
+#ifdef MODE_COMMUNICATION_CHECK
+        bool pingSentFlag = false;
+        bool pongRecvFlag = false;
+#endif
+
         getConnection();
 
-        syslog(LOG_INFO, "kbdex v" + KBDEX_VERSION + " | kbdexCore: Starting main loop");
+        syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexCore: Starting main loop");
+
+#ifdef MODE_COMMUNICATION_CHECK
+        syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexCore: Подготовка к отправке команды PING");
+#endif
 
         while (kbdexCore_main_loop_running) {
                 try {
+#ifdef MODE_COMMUNICATION_CHECK
+                        // kbdexCore запускается первым, поэтому он будет отправлять команду
+                        // PING и получать команду PONG.
+                        memset(&packet, '\0', sizeof(packet));
+
+                        if (!pingSendFlag) {
+                                packet.type = PacketType::Command;
+                                packet.cmd.command = Command::PING;
+                                packet.cmd.payload = "TEST";
+
+                                kbd_com->send(&packet);
+
+                                pingSendFlag = true;
+
+                                syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexCore: Команда PING отправлена. Ожидание команды PONG от kbdexKeyboardAgent...");
+
+                                continue;
+                        }
+
+                        if (!pongRecvFlag) {
+                                memset(&packet, '\0', sizeof(packet));
+                                // После отправки PING ожидаем команду PONG в ответ.
+                                kbd_com->recv(&packet);
+                        }
+
+                        if (packet.type == PacketType::Command) {
+                                syslog(LOG_INFO, "kbdex v" + std::string(KBDEX_VERSION) + " | kbdexCore: Получена команда PONG");
+                        }
+
+                        if (pingSentFlag && pongRecvFlag) {
+                                // Отправляем и получаем команды раз в 5 секунд
+                                sleep(5);
+                        }
+#else
                         bool repeat = true;
 
                         kbd_com->recv(&packet);
@@ -252,6 +297,7 @@ MacroDaemon::run()
 
                                 remote_udev.done();
                         }
+#endif
                 } catch (const SocketError &e) {
                         // Reset connection
                         syslog(LOG_ERR, "Socket error: %s", e.what());
@@ -263,5 +309,5 @@ MacroDaemon::run()
                 }
         }
 
-        syslog(LOG_INFO, "kbdex v" KBDEX_VERSION + " | kbdexCore exiting ...");
+        syslog(LOG_INFO, "kbdex v" std::string(KBDEX_VERSION) + " | kbdexCore exiting ...");
 }
