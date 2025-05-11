@@ -9,6 +9,8 @@ project(
 	LANGUAGES CXX C
 )
 
+option(MODE_COMMUNICATION_CHECK "Активация опции проверки связи между демонами. Все остальные функции программы отключены!" OFF)
+
 # Генерация основного кофигурационного файла программы config.h из config.h.in
 configure_file(cmake/kbdex_config.h.in ${CMAKE_BINARY_DIR}/kbdex_config.h @ONLY)
 

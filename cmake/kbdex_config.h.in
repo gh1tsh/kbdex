@@ -7,4 +7,11 @@
 #define KBDEX_VERSION_MINOR @PROJECT_VERSION_MINOR@
 #define KBDEX_VERSION_PATCH @PROJECT_VERSION_PATCH@
 
+/**
+ * Данный макрос объявлен с целью активации только тех частей кода kbdexKeyboardAgent и kbdexCore,
+ * которые позволяют проверить, что демоны могут корректно обмениваться командами и данными. Если
+ * макрос определён ВСЯ остальная функциональность программ будет отключена.
+ */
+#cmakedefine MODE_COMMUNICATION_CHECK
+
 #endif // KBDEX_CONFIG_H
