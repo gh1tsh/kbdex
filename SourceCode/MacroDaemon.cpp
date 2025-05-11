@@ -97,17 +97,12 @@ MacroDaemon::getConnection()
 }
 
 MacroDaemon::~MacroDaemon()
-{
-        for (auto &[_, s] : scripts) {
-                (void)_;
-                delete s;
-        }
-}
+{}
 
 void
 MacroDaemon::notify(string title, string msg)
 {
-        notify(title, msg, "hawck", NOTIFY_URGENCY_NORMAL);
+        notify(title, msg, "kbdex", NOTIFY_URGENCY_NORMAL);
 }
 
 void
@@ -164,47 +159,6 @@ MacroDaemon::reloadAll()
 }
 
 void
-MacroDaemon::startScriptWatcher()
-{
-        fsw.setWatchDirs(true);
-        fsw.setAutoAdd(true);
-        // TODO: Display desktop notifications for these syslogs.
-        //       You'll have to evaluate the thread-safety of doing that, and you
-        //       might have to push onto a shared notification queue rather than
-        //       just sending the messages directly from here.
-        fsw.asyncWatch([this](FSEvent &ev) {
-                lock_guard<mutex> lock(scripts_mtx);
-                try {
-                        // Don't react to the directory itself.
-                        if (ev.path == xdg.path(XDG_CONFIG_HOME, "scripts"))
-                                return true;
-
-                        if (ev.mask & IN_DELETE) {
-                                syslog(LOG_INFO, "Deleting script: %s", ev.path.c_str());
-                                unloadScript(ev.name);
-                        } else if (ev.mask & IN_MODIFY) {
-                                syslog(LOG_INFO, "Reloading script: %s", ev.path.c_str());
-                                if (!S_ISDIR(ev.stbuf.st_mode))
-                                        loadScript(ev.path);
-                        } else if (ev.mask & IN_CREATE) {
-                                syslog(LOG_INFO, "Loading new script: %s", ev.path.c_str());
-                                loadScript(ev.path);
-                        } else if (ev.mask & IN_ATTRIB) {
-                                if (ev.stbuf.st_mode & S_IXUSR) {
-                                        loadScript(ev.path);
-                                } else {
-                                        unloadScript(ev.path);
-                                }
-                        }
-                } catch (exception &e) {
-                        notify("Script Error", e.what(), "hawck", NOTIFY_URGENCY_CRITICAL);
-                        syslog(LOG_ERR, "Error while loading %s: %s", ev.path.c_str(), e.what());
-                }
-                return true;
-        });
-}
-
-void
 MacroDaemon::run()
 {
         syslog(LOG_INFO, "kbdex v%s | kbdexCore: Setting up kbdexCore ...", KBDEX_VERSION);
@@ -241,14 +195,14 @@ MacroDaemon::run()
                         // PING и получать команду PONG.
                         memset(&packet, '\0', sizeof(packet));
 
-                        if (!pingSendFlag) {
+                        if (!pingSentFlag) {
                                 packet.type = PacketType::Command;
                                 packet.cmd.command = Command::PING;
                                 strncpy(packet.cmd.payload, "TEST", 512);
 
                                 kbd_com->send(&packet);
 
-                                pingSendFlag = true;
+                                pingSentFlag = true;
 
                                 syslog(LOG_INFO, "kbdex v%s | kbdexCore: Команда PING отправлена. Ожидание команды PONG от kbdexKeyboardAgent...", KBDEX_VERSION);
 
