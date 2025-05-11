@@ -212,7 +212,7 @@ KBDDaemon::run()
                                 memset(&packet, '\0', sizeof(packet));
                                 packet.type = PacketType::Command;
                                 packet.cmd.command = Command::PONG;
-                                packet.cmd.payload = "TEST";
+                                strncpy(packet.cmd.payload, "TEST", 512);
 
                                 kbd_com.send(&packet);
 

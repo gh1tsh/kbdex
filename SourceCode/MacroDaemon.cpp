@@ -244,7 +244,7 @@ MacroDaemon::run()
                         if (!pingSendFlag) {
                                 packet.type = PacketType::Command;
                                 packet.cmd.command = Command::PING;
-                                packet.cmd.payload = "TEST";
+                                strncpy(packet.cmd.payload, "TEST", 512);
 
                                 kbd_com->send(&packet);
 
