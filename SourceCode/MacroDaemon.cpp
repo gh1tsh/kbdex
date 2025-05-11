@@ -233,14 +233,12 @@ MacroDaemon::run()
 
                                 if (!((!eval_keydown && ev.value == 1) ||
                                     (!eval_keyup && ev.value == 0)) && !disabled) {
-                                        lock_guard<mutex> lock(scripts_mtx);
-                                        // Look for a script match.
-                                        for (auto &[_, sc] : scripts) {
-                                                (void)_;
-                                                if (sc->isEnabled() &&
-                                                    !(repeat = runScript(sc, ev, kbd_hid)))
-                                                        break;
-                                        }
+                                        // Выполнение операций над событиями клавиатуры с мьютексом.
+                                        std::cout << "\nПолучено событие клавиатуры от kbdexKeyboardAgent:\n"
+                                                  << "[ done: " << packet.kbd_event.done << "\t"
+                                                  << "device: " << packet.kbd_eveте.dev_id << "\t"
+                                                  << "event: { " << ev.value << " " << ev.code <<
+                                                  << " " << ev.type << " } ]" std::endl;
                                 }
 
                                 if (repeat)
