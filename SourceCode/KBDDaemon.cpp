@@ -225,8 +225,13 @@ KBDDaemon::run()
                 }
 #else
                 packet.kbd_event.done = 0;
-                if (!kbman.getEvent(&packet))
+                if (!kbman.getEvent(&packet)) {
                         continue;
+                } else {
+                        // Если событие клавиатуры успешно получено и упаковано, то указываем
+                        // соответствующий тип пакета.
+                        packet.type = PacketType::KeyboardEvent;
+                }
 
                 // Нас интересуют только события клавиатуры, поэтому события других устройств ввода
                 // просто пропускаем.
@@ -236,7 +241,29 @@ KBDDaemon::run()
                         continue;
                 }
 
-                kbd_com.send(&packet);
+                input_event orig_ev = packet.kbd_event.ev;
+
+                try {
+                        kbd_com.send(&packet);
+
+                        udev.emit(&packet.kbd_event.ev);
+                        udev.flush();
+                } catch (const SocketError &e) {
+                        syslog(LOG_INFO, "Resetting connection to kbdexCore");
+
+                        udev.emit(&orig_ev);
+                        udev.upAll();
+                        udev.flush();
+
+                        auto unlock = kbman.unlockAll();
+                        syslog(LOG_CRIT,
+                               "Unable to communicate with kbdexCore, reconnecting ...");
+                        // Reconnect.
+                        kbd_com.recon();
+
+                        // Skip the received event
+                        continue;
+                }
 
                 /*
                 // Check if the key is listed in the passthrough set.
@@ -284,9 +311,6 @@ KBDDaemon::run()
                         }
                 }
                 */
-
-                udev.emit(&packet.kbd_event.ev);
-                udev.flush();
 #endif
         }
 }
