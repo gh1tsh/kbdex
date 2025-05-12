@@ -237,7 +237,7 @@ MacroDaemon::run()
                                         std::cout << "\nПолучено событие клавиатуры от kbdexKeyboardAgent:\n"
                                                   << "[ done: " << packet.kbd_event.done << "\t"
                                                   << "event: { " << ev.value << " " << ev.code
-                                                  << " " << ev.type << " } ]" std::endl;
+                                                  << " " << ev.type << " } ]" << std::endl;
                                 }
 
                                 if (repeat)
