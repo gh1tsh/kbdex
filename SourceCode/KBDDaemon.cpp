@@ -228,12 +228,17 @@ KBDDaemon::run()
                 if (!kbman.getEvent(&packet))
                         continue;
 
+                // Нас интересуют только события клавиатуры, поэтому события других устройств ввода
+                // просто пропускаем.
                 if (packet.kbd_event.ev.type != EV_KEY) {
                         udev.emit(&packet.kbd_event.ev);
                         udev.flush();
                         continue;
                 }
 
+                kbd_com.send(&packet);
+
+                /*
                 // Check if the key is listed in the passthrough set.
                 KeyVisibility key_vis;
                 if (packet.kbd_event.ev.code >= KEY_MAX) {
@@ -278,6 +283,7 @@ KBDDaemon::run()
                                 continue;
                         }
                 }
+                */
 
                 udev.emit(&packet.kbd_event.ev);
                 udev.flush();
