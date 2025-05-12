@@ -236,8 +236,7 @@ MacroDaemon::run()
                                         // Выполнение операций над событиями клавиатуры с мьютексом.
                                         std::cout << "\nПолучено событие клавиатуры от kbdexKeyboardAgent:\n"
                                                   << "[ done: " << packet.kbd_event.done << "\t"
-                                                  << "device: " << packet.kbd_eveте.dev_id << "\t"
-                                                  << "event: { " << ev.value << " " << ev.code <<
+                                                  << "event: { " << ev.value << " " << ev.code
                                                   << " " << ev.type << " } ]" std::endl;
                                 }
 
