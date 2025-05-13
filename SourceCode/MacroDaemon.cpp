@@ -229,6 +229,7 @@ MacroDaemon::run()
                                 // TODO: реализовать обработку команд
                                 continue;
                         } else if (packet.type == PacketType::KeyboardEvent) {
+                                /*
                                 string kbd_hid = kbdb.getID(&packet.kbd_event.dev_id);
 
                                 if (!((!eval_keydown && ev.value == 1) ||
@@ -244,6 +245,7 @@ MacroDaemon::run()
                                         remote_udev.emit(&ev);
 
                                 remote_udev.done();
+                                */
                         }
 #endif
                 } catch (const SocketError &e) {
