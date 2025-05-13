@@ -19,10 +19,20 @@ public:
         static const std::string getKeycodeReprEn(int keycode) const;
 
         /**
-         * @brief Обощённый метод для получения печатного представления символа клавиши с учётом
+         * @brief Обобщённый метод для получения печатного представления символа клавиши с учётом
          * переданного языка.
          */
         static const std::string getKeycodeRepr(int keycode, Language lang) const;
+
+        /**
+         * @brief Метод, определяющий, что клавиша является буквой.
+         */
+        static bool isLetter(int keycode) const;
+
+        /**
+         * @brief Метод, определяющий, что клавиша является цифрой.
+         */
+        static bool isDigit(int keycode) const;
 private:
         static const std::unordered_map<int, std::string> allKeys = {
                 KEY_ESC,
