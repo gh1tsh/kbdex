@@ -3,6 +3,10 @@
 #include <unordered_map>
 #include <string>
 
+extern "C" {
+#include <linux/input.h>
+}
+
 #include "Language.hpp"
 
 class Decoder
@@ -11,36 +15,36 @@ public:
         /**
          * @brief Метод для получения символа русского языка по коду клавиши.
          */
-        static const std::string getKeycodeReprRu(int keycode) const;
+        static const std::string getKeycodeReprRu(int keycode);
 
         /**
          * @brief Метод для получения символа английского языка по коду клавиши.
          */
-        static const std::string getKeycodeReprEn(int keycode) const;
+        static const std::string getKeycodeReprEn(int keycode);
 
         /**
          * @brief Обобщённый метод для получения печатного представления символа клавиши с учётом
          * переданного языка.
          */
-        static const std::string getKeycodeRepr(int keycode, Language lang) const;
+        static const std::string getKeycodeRepr(int keycode, Language lang);
 
         /**
          * @brief Метод, определяющий, что клавиша является буквой.
          */
-        static bool isLetter(int keycode) const;
+        static bool isLetter(int keycode);
 
         /**
          * @brief Метод, определяющий, что клавиша является цифрой.
          */
-        static bool isDigit(int keycode) const;
+        static bool isDigit(int keycode);
 
         /**
          * @brief Метод, определяющий, что клавиша является одним из пробельных символов: пробел,
          * Enter, таб.
          */
-        static bool isWhitespace(int keycode) const;
+        static bool isWhitespace(int keycode);
 private:
-        static const std::unordered_map<int, std::string> allKeys = {
+        static const std::vector<int> allKeys = {
                 KEY_ESC,
                 KEY_1,
                 KEY_2,
@@ -1053,7 +1057,7 @@ private:
                 {0x276,         "slowreverse"},
                 {0x277,         "data"},
                 {0x278,         "onscreen_keyboard"},
-        }
+        };
 
         static const std::unordered_map<int, std::string> keycodesToEnReprTable = {
                 {1,             "esc"},
@@ -1564,5 +1568,5 @@ private:
                 {0x276,         "slowreverse"},
                 {0x277,         "data"},
                 {0x278,         "onscreen_keyboard"},
-        }
+        };
 }

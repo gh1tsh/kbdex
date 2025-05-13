@@ -1,19 +1,19 @@
 #include "Decoder.hpp"
 
 const std::string
-Decoder::getKeycodeReprRu(int keycode) const
+Decoder::getKeycodeReprRu(int keycode)
 {
         return Decoder::keycodesToRuReprTable.at(keycode);
 }
 
 const std::string
-Decoder::getKeycodeReprEn(int keycode) const
+Decoder::getKeycodeReprEn(int keycode)
 {
         return Decoder::kecodesToEnReprTable.at(keycode);
 }
 
 const std::string
-Decoder::getKeycodeRepr(int keycode, Language lang) const
+Decoder::getKeycodeRepr(int keycode, Language lang)
 {
         std::string repr;
 
@@ -33,7 +33,7 @@ Decoder::getKeycodeRepr(int keycode, Language lang) const
 }
 
 bool
-Decoder::isLetter(int keycode) const
+Decoder::isLetter(int keycode)
 {
         bool result;
 
@@ -49,7 +49,7 @@ Decoder::isLetter(int keycode) const
 }
 
 bool
-Decoder::isDigit(int keycode) const
+Decoder::isDigit(int keycode)
 {
         bool result;
 
