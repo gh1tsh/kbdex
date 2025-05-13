@@ -167,7 +167,7 @@ MacroDaemon::processKbdEvent(const Packet& packet)
 
         int keycode = packet.kbd_event.ev.value;
 
-        char repr = Decoder::getKeycodeRepr(keycode);
+        char repr = Decoder::getKeycodeReprRu(keycode);
 
         if (Decoder::isWhitespace(keycode)) {
                 this->processBuffers();
