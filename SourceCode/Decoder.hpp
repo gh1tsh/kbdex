@@ -2,9 +2,11 @@
 
 #include <unordered_map>
 #include <string>
+#include <vector>
 
 extern "C" {
 #include <linux/input.h>
+#include <linux/version.h>
 }
 
 #include "Language.hpp"
