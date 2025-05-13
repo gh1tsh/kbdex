@@ -72,9 +72,9 @@ private:
         XDG                     xdg;
         // TODO: необходимо учесть, что в три буфера ниже может прийти очень много событий, поэтому
         // нужно реализовать защиту от их чрезмерного использования.
-        std::vector<Packet>     kbd_events_buffer;
-        std::vector<Packet>     cmds_buffer;
-        std::vector<char>       char_buffer;
+        std::vector<Packet>             kbd_events_buffer;
+        std::vector<Packet>             cmds_buffer;
+        std::vector<std::string>        char_buffer;
 
         std::atomic<bool> notify_on_err;
         std::atomic<bool> stop_on_err;
