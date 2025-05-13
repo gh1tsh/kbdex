@@ -41,7 +41,9 @@ extern "C" {
 }
 
 #include "Daemon.hpp"
+#include "Decoder.hpp"
 #include "KBDB.hpp"
+#include "Language.hpp"
 #include "MacroDaemon.hpp"
 #include "Permissions.hpp"
 #include "Popen.hpp"
@@ -159,6 +161,48 @@ MacroDaemon::reloadAll()
 }
 
 void
+MacroDaemon::processKbdEvent(const Packet& packet)
+{
+        this->kbd_events_buffer.push_back(packet);
+
+        int keycode = packet.kbd_event.ev.value;
+
+        char repr = Decoder::getKeycodeRepr(keycode);
+
+        if (Decoder::isWhitespace(keycode)) {
+                this->processBuffers();
+                return;
+        }
+
+        if (Decoder::isLetter(keycode) || Decoder::isDigit(keycode)) {
+                this->char_buffer.push_back(repr);
+        }
+}
+
+void
+MacroDaemon::processCmd(const Packet& packet)
+{
+        return;
+}
+
+void
+MacroDaemon::processBuffers()
+{
+        this->kbd_events_buffer.clear();
+
+        std::string content;
+
+        for (char c : this->char_buffer) {
+                content += c;
+        }
+
+        // На данном этапе просто посмотрим, как работает обработка вводимых символов.
+        std::cout << content << std::endl;
+
+        this->char_buffer.clear();
+}
+
+void
 MacroDaemon::run()
 {
         syslog(LOG_INFO, "kbdex v%s | kbdexCore: Setting up kbdexCore ...", KBDEX_VERSION);
@@ -229,6 +273,7 @@ MacroDaemon::run()
                                 // TODO: реализовать обработку команд
                                 continue;
                         } else if (packet.type == PacketType::KeyboardEvent) {
+                                processKbdEvent(packet);
                                 /*
                                 string kbd_hid = kbdb.getID(&packet.kbd_event.dev_id);
 
