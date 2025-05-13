@@ -33,6 +33,7 @@ set(KBDEX_CORE_SRC
     XDG.cpp
     KBDB.cpp
     Popen.cpp
+    Decoder.cpp
 )
 
 add_executable(kbdexCore ${KBDEX_CORE_SRC})
