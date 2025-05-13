@@ -33,6 +33,12 @@ public:
          * @brief Метод, определяющий, что клавиша является цифрой.
          */
         static bool isDigit(int keycode) const;
+
+        /**
+         * @brief Метод, определяющий, что клавиша является одним из пробельных символов: пробел,
+         * Enter, таб.
+         */
+        static bool isWhitespace(int keycode) const;
 private:
         static const std::unordered_map<int, std::string> allKeys = {
                 KEY_ESC,

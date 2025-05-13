@@ -61,3 +61,17 @@ Decoder::isDigit(int keycode) const
 
         return result;
 }
+
+bool
+Decoder::isWhitespace(int keycode) const
+{
+        bool result;
+
+        if (keycode = 15 || keycode = 28 || keycode = 57) {
+                result = true;
+        } else {
+                result = false;
+        }
+
+        return result;
+}
