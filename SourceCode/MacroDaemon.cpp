@@ -165,7 +165,7 @@ MacroDaemon::processKbdEvent(const Packet& packet)
 {
         this->kbd_events_buffer.push_back(packet);
 
-        int keycode = packet.kbd_event.ev.value;
+        int keycode = packet.kbd_event.ev.code;
 
         std::string repr = Decoder::getKeycodeReprRu(keycode);
 
@@ -192,7 +192,7 @@ MacroDaemon::processBuffers()
 
         std::string content;
 
-        for (char c : this->char_buffer) {
+        for (auto &c : this->char_buffer) {
                 content += c;
         }
 
@@ -273,7 +273,9 @@ MacroDaemon::run()
                                 // TODO: реализовать обработку команд
                                 continue;
                         } else if (packet.type == PacketType::KeyboardEvent) {
-                                processKbdEvent(packet);
+                                if (ev.value == 1) {
+                                        processKbdEvent(packet);
+                                }
                                 /*
                                 string kbd_hid = kbdb.getID(&packet.kbd_event.dev_id);
 

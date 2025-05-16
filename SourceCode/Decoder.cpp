@@ -1,15 +1,21 @@
+extern "C" {
+#include <linux/input.h>
+#include <linux/uinput.h>
+#include <linux/version.h>
+}
+
 #include "Decoder.hpp"
 
 const std::string
 Decoder::getKeycodeReprRu(int keycode)
 {
-        return Decoder::keycodesToRuReprTable.at(keycode);
+        return keycodesToRuReprTable.at(keycode);
 }
 
 const std::string
 Decoder::getKeycodeReprEn(int keycode)
 {
-        return Decoder::kecodesToEnReprTable.at(keycode);
+        return keycodesToEnReprTable.at(keycode);
 }
 
 const std::string
@@ -63,11 +69,11 @@ Decoder::isDigit(int keycode)
 }
 
 bool
-Decoder::isWhitespace(int keycode) const
+Decoder::isWhitespace(int keycode)
 {
         bool result;
 
-        if (keycode = 15 || keycode = 28 || keycode = 57) {
+        if (keycode == 15 || keycode == 28 || keycode == 57) {
                 result = true;
         } else {
                 result = false;

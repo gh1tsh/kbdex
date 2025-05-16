@@ -4,4 +4,4 @@ enum class Language
 {
         RU,
         EN
-}
+};
