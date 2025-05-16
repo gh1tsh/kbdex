@@ -107,6 +107,10 @@ private:
 
         void processCmd(const Packet& ev);
 
+        std::string getCurrentKeyboardLayoutGnome() const;
+
+        std::string getCurrentKeyboardLayoutKDE() const;
+
         void processBuffers();
 
 public:

@@ -17,6 +17,8 @@ find_package(PkgConfig REQUIRED)
 find_package(Threads REQUIRED)
 
 pkg_check_modules(LIBNOTIFY REQUIRED IMPORTED_TARGET libnotify)
+pkg_check_modules(GLIBMM REQUIRED glibmm-2.68)
+pkg_check_modules(GIOMM REQUIRED giomm-2.68)
 
 # TODO: добавить библиотеки, необходимые моему проекту: libinput, libevdev, libudev
 
@@ -40,11 +42,14 @@ add_executable(kbdexCore ${KBDEX_CORE_SRC})
 
 target_link_libraries(kbdexCore
     PkgConfig::LIBNOTIFY
+    ${GLIBMM_LIBRARIES}
+    ${GIOMM_LIBRARIES}
     Threads::Threads
 )
 
 target_include_directories(kbdexCore
     PRIVATE ${CMAKE_BINARY_DIR}
+    ${GIOMM_INCLUDE_DIRS}
 )
 
 # install(TARGETS hawck-macrod)

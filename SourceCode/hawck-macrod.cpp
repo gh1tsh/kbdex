@@ -51,6 +51,9 @@ extern "C" {
 #include <syslog.h>
 }
 
+#include <giomm.h>
+#include <glibmm.h>
+
 using namespace std;
 
 static int no_fork;
@@ -131,6 +134,8 @@ main(int argc, char *argv[])
         // pidfile.
         string pid_file = xdg.path(XDG_RUNTIME_DIR, "kbdexCore.pid");
         killPretender(pid_file);
+
+        Gio::init();
 
         MacroDaemon daemon;
         try {

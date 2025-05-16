@@ -81,5 +81,8 @@ xneurchecker/xneurchecker.anjuta
 *.kdev4
 *.pro.user*
 
+# Visual Studio Code files
+.vscode/
+
 # cmake build directories
 build/

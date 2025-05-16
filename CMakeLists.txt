@@ -9,6 +9,8 @@ project(
 	LANGUAGES CXX C
 )
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 option(MODE_COMMUNICATION_CHECK "Активация опции проверки связи между демонами. Все остальные функции программы отключены!" OFF)
 
 # Генерация основного кофигурационного файла программы config.h из config.h.in

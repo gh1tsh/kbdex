@@ -40,6 +40,11 @@ extern "C" {
 #include <syslog.h>
 }
 
+#include <giomm.h>
+#include <glibmm.h>
+#include <glibmm/variant.h>
+#include <giomm/settings.h> // для взаимодействия с настройками GNOME
+
 #include "Daemon.hpp"
 #include "Decoder.hpp"
 #include "KBDB.hpp"
@@ -185,6 +190,24 @@ MacroDaemon::processCmd(const Packet& packet)
         return;
 }
 
+std::string
+MacroDaemon::getCurrentKeyboardLayoutGnome() const
+{
+        Glib::RefPtr<Gio::Settings> s = Gio::Settings::create(Glib::ustring("org.gnome.desktop.input-sources"));
+        // std::vector<Glib::ustring> res = s->get_string_array(Glib::ustring("mru-sources"));
+
+        std::vector<Glib::ustring> res;
+
+        g_settings_get(s->get_object(), "mru-sources", "a(ss)", &res);
+
+        // GVariant test = res.at(0);
+
+        // std::cout << std::endl;
+        // for (size_t i = 0; i < res.size(); ++i)
+        //         std::cout << res[i] << std::endl;
+        // std::cout << std::endl;
+}
+
 void
 MacroDaemon::processBuffers()
 {
@@ -273,6 +296,7 @@ MacroDaemon::run()
                                 // TODO: реализовать обработку команд
                                 continue;
                         } else if (packet.type == PacketType::KeyboardEvent) {
+                                this->getCurrentKeyboardLayoutGnome();
                                 if (ev.value == 1) {
                                         processKbdEvent(packet);
                                 }
